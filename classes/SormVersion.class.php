@@ -2,6 +2,8 @@
 
 class SormVersion extends SimpleORMap {
 
+    protected $invokation = null;
+
     protected static function configure($config = array())
     {
         $config['db_table'] = 'sorm_versions';
@@ -24,9 +26,27 @@ class SormVersion extends SimpleORMap {
 
     function cbUnserializeData()
     {
-        $this->content['json_data'] = (array) studip_utf8decode(json_decode($this->content['json_data']));
-        $this->content_db['json_data'] = (array) studip_utf8decode(json_decode($this->content_db['json_data']));
+        $this->content['json_data'] = (array) studip_utf8decode(json_decode($this->content['json_data'], true));
+        $this->content_db['json_data'] = (array) studip_utf8decode(json_decode($this->content_db['json_data'], true));
         return true;
+    }
+
+    public function invoke() {
+        if ($this->invokation === null) {
+            $class = $this['sorm_class'];
+            $this->invokation = new $class($this['item_id']);
+        }
+        return $this->invokation;
+    }
+
+    public function isCurrentObject() {
+        if (!isset($this['sorm_class']['chdate'])) {
+            return false;
+        }
+        $class = $this['sorm_class'];
+        $new_instance = new $class($this['item_id']);
+        return $new_instance->isField("chdate")
+            && $new_instance['chdate'] <= $this['sorm_class']['chdate'];
     }
 
 }

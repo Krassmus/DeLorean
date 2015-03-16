@@ -6,8 +6,11 @@ class TimeTraveller extends StudIPPlugin implements SystemPlugin {
 
     public function __construct() {
         parent::__construct();
-        NotificationCenter::addObserver($this, "versioning", "after_update");
-        NotificationCenter::addObserver($this, "versioning", "after_create");
+        NotificationCenter::addObserver($this, "versioning", "SimpleORMapDidStore");
+        if ($GLOBALS['perm']->have_perm("root")) {
+            $navigation = new Navigation(_("TimeTraveller"), PluginEngine::getURL($this, array(), "view/all"));
+            Navigation::addItem("/admin/locations/timetraveller", $navigation);
+        }
     }
 
     public function versioning($event, $sorm) {

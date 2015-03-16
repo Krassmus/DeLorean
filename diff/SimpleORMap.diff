@@ -1,0 +1,12 @@
+Index: SimpleORMap.class.php
+===================================================================
+--- SimpleORMap.class.php	(Revision 33542)
++++ SimpleORMap.class.php	(Arbeitskopie)
+@@ -1652,6 +1660,7 @@
+         }
+         $rel_ret = $this->storeRelations();
+         $this->applyCallbacks('after_store');
++        NotificationCenter::postNotification("SimpleORMapDidStore", $this);
+         if ($ret || $rel_ret) {
+             $this->restore();
+         }
