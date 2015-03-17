@@ -10,6 +10,7 @@ class ViewController extends PluginController {
         }
         Navigation::activateItem("/admin/locations/timetraveller");
         $this->versions = SormVersion::findBySQL("1=1 ORDER BY mkdate DESC");
+        $this->render_template("view/versions.php", $this->layout);
     }
 
     public function details_action($id) {
@@ -19,6 +20,12 @@ class ViewController extends PluginController {
         }
         Navigation::activateItem("/admin/locations/timetraveller");
         PageLayout::setTitle(_("Versionsdetails"));
+    }
+
+    public function object_history_action($item_id) {
+        Navigation::activateItem("/admin/locations/timetraveller");
+        $this->versions = SormVersion::findBySQL("item_id = ? ORDER BY mkdate DESC", array($item_id));
+        $this->render_template("view/versions.php", $this->layout);
     }
 
     public function undo_action($id) {

@@ -1,6 +1,6 @@
 <?php
 
-class InitPluginMigration extends Migration {
+class InitPlugin extends Migration {
     
     public function up() {
         DBManager::get()->exec("

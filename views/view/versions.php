@@ -20,7 +20,9 @@ function stringToColorCode($str) {
         <? foreach ($versions as $version) : ?>
             <tr>
                 <td>
-                    <span style="display: inline-block; width: 10px; height: 10px; background-color: #<?= stringToColorCode($version['item_id']) ?>; border: thin solid black;" title="ID: <?= htmlReady($version['item_id']) ?>"></span>
+                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/object_history/".$version['item_id']) ?>"
+                       style="display: inline-block; width: 10px; height: 10px; background-color: #<?= stringToColorCode($version['item_id']) ?>; border: thin solid black;"
+                       title="ID: <?= htmlReady($version['item_id']) ?>"></a>
                 </td>
                 <td>
                     <?= htmlReady($version['sorm_class']) ?>
