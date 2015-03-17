@@ -9,6 +9,7 @@ function stringToColorCode($str) {
 <table class="default">
     <thead>
         <tr>
+            <th></th>
             <th><?= _("Typ") ?></th>
             <th><?= _("Veränderer") ?></th>
             <th><?= _("Datum") ?></th>
@@ -20,6 +21,8 @@ function stringToColorCode($str) {
             <tr>
                 <td>
                     <span style="display: inline-block; width: 10px; height: 10px; background-color: #<?= stringToColorCode($version['item_id']) ?>; border: thin solid black;" title="ID: <?= htmlReady($version['item_id']) ?>"></span>
+                </td>
+                <td>
                     <?= htmlReady($version['sorm_class']) ?>
                 </td>
                 <td>
@@ -34,7 +37,7 @@ function stringToColorCode($str) {
                         <?= Assets::img("icons/20/blue/info-circle", array('class' => "text-bottom")) ?>
                     </a>
                     <? if (!$version->isCurrentObject()) : ?>
-                    <a href="" title="<?= _("Object wiederherstellen.") ?>">
+                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/undo/".$version->getId()) ?>" title="<?= _("Änderung rückgängig machen") ?>">
                         <?= Assets::img("icons/20/blue/archive2", array('class' => "text-bottom")) ?>
                     </a>
                     <? endif ?>

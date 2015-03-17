@@ -49,4 +49,11 @@ class SormVersion extends SimpleORMap {
             && $new_instance['chdate'] <= $this['sorm_class']['chdate'];
     }
 
+    public function previousVersion() {
+        return SormVersion::findOneBySQL("item_id = :item_id AND mkdate < :mkdate", array(
+            'item_id' => $this['item_id'],
+            'mkdate' => $this['mkdate']
+        ));
+    }
+
 }
