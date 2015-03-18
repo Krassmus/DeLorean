@@ -9,7 +9,7 @@ class ViewController extends PluginController {
             throw new AccessDeniedException("Kein Zugriff");
         }
         Navigation::activateItem("/admin/locations/timetraveller");
-        $this->versions = SormVersion::findBySQL("1=1 ORDER BY mkdate DESC");
+        $this->versions = SormVersion::findBySQL("1=1 ORDER BY version_id DESC");
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -24,7 +24,13 @@ class ViewController extends PluginController {
 
     public function object_history_action($item_id) {
         Navigation::activateItem("/admin/locations/timetraveller");
-        $this->versions = SormVersion::findBySQL("item_id = ? ORDER BY mkdate DESC", array($item_id));
+        $this->versions = SormVersion::findBySQL("item_id = ? ORDER BY version_id DESC", array($item_id));
+        $this->render_template("view/versions.php", $this->layout);
+    }
+
+    public function second_action($timestamp) {
+        Navigation::activateItem("/admin/locations/timetraveller");
+        $this->versions = SormVersion::findBySQL("mkdate = ? ORDER BY version_id DESC", array($timestamp));
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -43,7 +49,6 @@ class ViewController extends PluginController {
             }
         } else {
             $this->current = $this->version->invoke();
-
 
             if (!$this->current) {
                 $class = $this->version['sorm_class'];

@@ -3,16 +3,23 @@
 class SormVersion extends SimpleORMap {
 
     protected $invokation = null;
-    static protected $forbidden = array("SormVersion", "PersonalNotification");
+    static protected $forbidden = array("SormVersion", "PersonalNotifications",
+        "Message", "MessageUser");
 
     static public function getFileDataPath() {
         return $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
     }
 
     static public function isAllowed($class) {
-        $class = is_object($class) ? get_class($class) : $class;
-        return (is_a($class, "SimpleORMap")
-            && !in_array($class, self::$forbidden));
+        if (!is_a($class, "SimpleORMap")) {
+            return false;
+        }
+        foreach(self::$forbidden as $forbidden_class) {
+            if (is_a($class, $forbidden_class)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected static function configure($config = array())
@@ -87,9 +94,9 @@ class SormVersion extends SimpleORMap {
     }
 
     public function previousVersion() {
-        return SormVersion::findOneBySQL("item_id = :item_id AND mkdate < :mkdate", array(
+        return SormVersion::findOneBySQL("item_id = :item_id AND version_id < :next_version_id", array(
             'item_id' => $this['item_id'],
-            'mkdate' => $this['mkdate']
+            'next_version_id' => $this->getId()
         ));
     }
 

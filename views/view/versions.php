@@ -6,6 +6,10 @@ function stringToColorCode($str) {
 }
 ?>
 
+<form method="get" action="?">
+
+</form>
+
 <table class="default">
     <thead>
         <tr>
@@ -33,7 +37,11 @@ function stringToColorCode($str) {
                         <?= htmlReady(get_fullname($version['user_id'])) ?>
                     </a>
                 </td>
-                <td><?= date("G:i d.n.Y", $version['mkdate']) ?></td>
+                <td>
+                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/second/".$version['mkdate']) ?>">
+                        <?= date("G:i d.n.Y", $version['mkdate']) ?>
+                    </a>
+                </td>
                 <td>
                     <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog>
                         <?= Assets::img("icons/20/blue/info-circle", array('class' => "text-bottom")) ?>
