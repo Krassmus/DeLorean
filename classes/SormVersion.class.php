@@ -5,6 +5,10 @@ class SormVersion extends SimpleORMap {
     protected $invokation = null;
     static protected $forbidden = array("SormVersion", "PersonalNotification");
 
+    static public function getFileDataPath() {
+        return $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
+    }
+
     static public function isAllowed($class) {
         $class = is_object($class) ? get_class($class) : $class;
         return (is_a($class, "SimpleORMap")
@@ -21,6 +25,7 @@ class SormVersion extends SimpleORMap {
     {
         $this->registerCallback('before_store', 'cbSerializeData');
         $this->registerCallback('after_store after_initialize', 'cbUnserializeData');
+        $this->registerCallback('after_store', 'cbSaveFile');
         parent::__construct($id);
     }
 
@@ -36,6 +41,31 @@ class SormVersion extends SimpleORMap {
         $this->content['json_data'] = (array) studip_utf8decode(json_decode($this->content['json_data'], true));
         $this->content_db['json_data'] = (array) studip_utf8decode(json_decode($this->content_db['json_data'], true));
         return true;
+    }
+
+    function cbSaveFile()
+    {
+        if ($this['original_file_path'] && file_exists($this['original_file_path'])) {
+            @copy($this['original_file_path'], $this->getFilePath());
+        }
+        return true;
+    }
+
+    public function delete() {
+        parent::delete();
+        if ($this['original_file_path'] && file_exists($this->getFilePath())) {
+            @unlink($this->getFilePath());
+        }
+    }
+
+    public function getFilePath() {
+        if (!file_exists(self::getFileDataPath())) {
+            mkdir(self::getFileDataPath());
+        }
+        if (!$this->getId()) {
+            $this->setId($this->getNewId());
+        }
+        return self::getFileDataPath()."/".$this->getId();
     }
 
     public function invoke() {

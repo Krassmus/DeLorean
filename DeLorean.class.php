@@ -20,6 +20,9 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             $version['sorm_class'] = get_class($sorm);
             $version['item_id'] = $sorm->id;
             $version['json_data'] = $sorm->toArray();
+            if (is_a($sorm, "StudipDocument")) {
+                $version['original_file_path'] = get_upload_file_path($sorm->getId());
+            }
             $version->store();
         }
         return true;
