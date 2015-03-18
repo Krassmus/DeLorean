@@ -15,4 +15,5 @@ Das Plugin ist noch in der Entwicklung
 Das Plugin steht unter "GPL 2 or later" und der Mozilla Public License Version 2. 
 Das obige Bild eines DeLorean DMC-12 steht unter Creative Commons Attribution-Share Alike 4.0 und stammt vom Wikipedia-User Terabass, siehe hier http://en.wikipedia.org/wiki/File:TeamTimeCar.com-BTTF_DeLorean_Time_Machine-OtoGodfrey.com-JMortonPhoto.com-07.jpg
 
+Der Name LeLorean hat kein aktives Trademark und kann frei verwendet werden.
 
