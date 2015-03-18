@@ -3,6 +3,13 @@
 class SormVersion extends SimpleORMap {
 
     protected $invokation = null;
+    static protected $forbidden = array("SormVersion", "PersonalNotification");
+
+    static public function isAllowed($class) {
+        $class = is_object($class) ? get_class($class) : $class;
+        return (is_a($class, "SimpleORMap")
+            && !in_array($class, self::$forbidden));
+    }
 
     protected static function configure($config = array())
     {

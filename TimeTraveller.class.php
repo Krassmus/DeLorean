@@ -14,7 +14,7 @@ class TimeTraveller extends StudIPPlugin implements SystemPlugin {
     }
 
     public function versioning($event, $sorm) {
-        if (!is_a($sorm, "SormVersion")) { //very important!
+        if (SormVersion::isAllowed($sorm)) { //very important!
             $version = new SormVersion();
             $version['user_id'] = $GLOBALS['user']->id;
             $version['sorm_class'] = get_class($sorm);
