@@ -29,7 +29,9 @@ function stringToColorCode($str) {
                        title="ID: <?= htmlReady($version['item_id']) ?>"></a>
                 </td>
                 <td>
-                    <?= htmlReady($version['sorm_class']) ?>
+                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/type/".$version['sorm_class']) ?>">
+                        <?= htmlReady($version['sorm_class']) ?>
+                    </a>
                 </td>
                 <td>
                     <a href="<?= URLHelper::getLink("dispatch.php/profile", array('username' => get_username($version['user_id']))) ?>">
@@ -56,3 +58,10 @@ function stringToColorCode($str) {
         <? endforeach ?>
     </tbody>
 </table>
+
+
+<?
+
+$search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/all"));
+$search->addNeedle(_("ID, Eigenschaft, Zeitstempel"), "searchfor", true);
+Sidebar::Get()->addWidget($search);

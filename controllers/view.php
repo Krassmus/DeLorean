@@ -14,10 +14,14 @@ class ViewController extends PluginController {
         if (!$GLOBALS['perm']->have_perm("root")) {
             throw new AccessDeniedException("Kein Zugriff");
         }
-        $this->versions = $this->getVersions(array(
+        $params = array(
             'offset' => Request::int("offset", 0),
             'limit' => Request::int("limit", 30)
-        ));
+        );
+        if (Request::get("searchfor")) {
+            $params['searchfor'] = Request::get("searchfor");
+        }
+        $this->versions = $this->getVersions($params);
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -53,6 +57,15 @@ class ViewController extends PluginController {
             'offset' => Request::int("offset", 0),
             'limit' => Request::int("limit", 30),
             'mkdate' => $timestamp
+        ));
+        $this->render_template("view/versions.php", $this->layout);
+    }
+
+    public function type_action($class) {
+        $this->versions = $this->getVersions(array(
+            'offset' => Request::int("offset", 0),
+            'limit' => Request::int("limit", 30),
+            'type' => $class
         ));
         $this->render_template("view/versions.php", $this->layout);
     }
@@ -108,6 +121,19 @@ class ViewController extends PluginController {
             $constraints[] = "mkdate = :mkdate";
             $parameter['mkdate'] = $params['mkdate'];
         }
+        if ($params['since']) {
+            $constraints[] = "mkdate <= :since";
+            $parameter['since'] = $params['since'];
+        }
+        if ($params['searchfor']) {
+            $constraints[] = "json_data LIKE :searchfor";
+            $parameter['searchfor'] = '%'.$params['searchfor'].'%';
+        }
+        if ($params['type']) {
+            $constraints[] = "sorm_class = :sorm_class";
+            $parameter['sorm_class'] = $params['type'];
+        }
+
 
         if (count($constraints) === 0) {
             $constraints[] = "1=1";
