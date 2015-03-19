@@ -4,7 +4,7 @@ class SormVersion extends SimpleORMap {
 
     protected $invokation = null;
     static protected $forbidden = array("SormVersion", "PersonalNotifications",
-        "Message", "MessageUser");
+        "Message", "MessageUser", "UserConfigEntry");
 
     static public function getFileDataPath() {
         return $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
