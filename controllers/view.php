@@ -8,6 +8,7 @@ class ViewController extends PluginController {
     {
         parent::before_filter($action, $args);
         Navigation::activateItem("/admin/config/delorean");
+        $this->internal_limit = 50;
     }
 
     public function all_action() {
@@ -16,12 +17,17 @@ class ViewController extends PluginController {
         }
         $params = array(
             'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", 30)
+            'limit' => Request::int("limit", $this->internal_limit) + 1
         );
         if (Request::get("searchfor")) {
             $params['searchfor'] = Request::get("searchfor");
+            $this->searchfor = Request::get("searchfor");
         }
         $this->versions = $this->getVersions($params);
+        if (count($this->versions) > $this->internal_limit) {
+            array_pop($this->versions);
+            $this->more = true;
+        }
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -31,8 +37,31 @@ class ViewController extends PluginController {
         }
         $this->versions = $this->getVersions(array(
             'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", 30)
+            'limit' => Request::int("limit", $this->internal_limit) + 1,
+            'item_id' => Request::option("item_id"),
+            'searchfor' => Request::get("searchfor"),
+            'mkdate' => Request::int("mkdate"),
+            'type' => Request::get("type")
         ));
+        if (count($this->versions) > $this->internal_limit) {
+            array_pop($this->versions);
+            $this->more = true;
+        }
+
+        $factory = $this->get_template_factory();
+
+
+        $output = array('versions' => array());
+        foreach ($this->versions as $version) {
+            $template = $factory->open("view/_version.php");
+            $template->set_attribute('version', $version);
+            $template->set_attribute('plugin', $this->plugin);
+            $html = $template->render();
+            $output['versions'][] = array('html' => $html);
+        }
+        $output['more'] = $this->more ? 1 : 0;
+
+        $this->render_json($output);
     }
 
     public function details_action($id) {
@@ -46,27 +75,42 @@ class ViewController extends PluginController {
     public function object_history_action($item_id) {
         $this->versions = $this->getVersions(array(
             'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", 30),
+            'limit' => Request::int("limit", $this->internal_limit) + 1,
             'item_id' => $item_id
         ));
+        if (count($this->versions) > $this->internal_limit) {
+            array_pop($this->versions);
+            $this->more = true;
+        }
+        $this->item_id = $item_id;
         $this->render_template("view/versions.php", $this->layout);
     }
 
     public function second_action($timestamp) {
         $this->versions = $this->getVersions(array(
             'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", 30),
+            'limit' => Request::int("limit", $this->internal_limit) + 1,
             'mkdate' => $timestamp
         ));
+        $this->mkdate = $timestamp;
+        if (count($this->versions) > $this->internal_limit) {
+            array_pop($this->versions);
+            $this->more = true;
+        }
         $this->render_template("view/versions.php", $this->layout);
     }
 
     public function type_action($class) {
         $this->versions = $this->getVersions(array(
             'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", 30),
+            'limit' => Request::int("limit", $this->internal_limit) + 1,
             'type' => $class
         ));
+        $this->type = $class;
+        if (count($this->versions) > $this->internal_limit) {
+            array_pop($this->versions);
+            $this->more = true;
+        }
         $this->render_template("view/versions.php", $this->layout);
     }
 

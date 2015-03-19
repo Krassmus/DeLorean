@@ -33,4 +33,10 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
         return true;
     }
 
+    public function stringToColorCode($str) {
+        $code = dechex(crc32($str));
+        $code = substr($code, 0, 6);
+        return $code;
+    }
+
 }

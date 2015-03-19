@@ -1,16 +1,24 @@
-<?php
-function stringToColorCode($str) {
-    $code = dechex(crc32($str));
-    $code = substr($code, 0, 6);
-    return $code;
-}
-?>
-
 <form method="get" action="?">
 
 </form>
 
-<table class="default">
+<input type="hidden" id="offset" value="<?= Request::int("offset", 0) ?>">
+<input type="hidden" id="limit" value="<?= $internal_limit ?>">
+<input type="hidden" id="since" value="<?= time() ?>">
+<? if ($item_id) : ?>
+    <input type="hidden" id="item_id" value="<?= htmlReady($item_id) ?>">
+<? endif ?>
+<? if ($searchfor) : ?>
+    <input type="hidden" id="searchfor" value="<?= htmlReady($searchfor) ?>">
+<? endif ?>
+<? if ($mkdate) : ?>
+    <input type="hidden" id="mkdate" value="<?= htmlReady($mkdate) ?>">
+<? endif ?>
+<? if ($type) : ?>
+    <input type="hidden" id="type" value="<?= htmlReady($type) ?>">
+<? endif ?>
+
+<table class="default" id="sormversions">
     <thead>
         <tr>
             <th></th>
@@ -22,43 +30,54 @@ function stringToColorCode($str) {
     </thead>
     <tbody>
         <? foreach ($versions as $version) : ?>
-            <tr>
-                <td>
-                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/object_history/".$version['item_id']) ?>"
-                       style="display: inline-block; width: 10px; height: 10px; background-color: #<?= stringToColorCode($version['item_id']) ?>; border: thin solid black;"
-                       title="ID: <?= htmlReady($version['item_id']) ?>"></a>
-                </td>
-                <td>
-                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/type/".$version['sorm_class']) ?>">
-                        <?= htmlReady($version['sorm_class']) ?>
-                    </a>
-                </td>
-                <td>
-                    <a href="<?= URLHelper::getLink("dispatch.php/profile", array('username' => get_username($version['user_id']))) ?>">
-                        <?= Avatar::getAvatar($version['user_id'])->getImageTag(Avatar::SMALL) ?>
-                        <?= htmlReady(get_fullname($version['user_id'])) ?>
-                    </a>
-                </td>
-                <td>
-                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/second/".$version['mkdate']) ?>">
-                        <?= date("G:i d.n.Y", $version['mkdate']) ?>
-                    </a>
-                </td>
-                <td>
-                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog>
-                        <?= Assets::img("icons/20/blue/info-circle", array('class' => "text-bottom")) ?>
-                    </a>
-                    <? if (!$version->isCurrentObject()) : ?>
-                    <a href="<?= PluginEngine::getLink($plugin, array(), "view/undo/".$version->getId()) ?>" title="<?= _("Änderung rückgängig machen") ?>">
-                        <?= Assets::img("icons/20/blue/archive2", array('class' => "text-bottom")) ?>
-                    </a>
-                    <? endif ?>
-                </td>
-            </tr>
+            <?= $this->render_partial("view/_version.php", array('version' => $version)) ?>
         <? endforeach ?>
     </tbody>
+    <tfoot>
+    <? if ($more) : ?>
+        <tr class="more">
+            <td colspan="5" style="text-align: center">
+                <?= Assets::img("ajax-indicator-black.svg") ?>
+            </td>
+        </tr>
+    <? endif ?>
+    </tfoot>
 </table>
 
+<script>
+    //Infinity-scroll:
+    jQuery(window.document).bind('scroll', _.throttle(function (event) {
+        if ((jQuery(window).scrollTop() + jQuery(window).height() > jQuery(window.document).height() - 500)
+            && (jQuery("#sormversions .more").length > 0)) {
+            //nachladen
+            jQuery("#sormversions .more").removeClass("more").addClass("loading");
+            jQuery.ajax({
+                url: STUDIP.ABSOLUTE_URI_STUDIP + "plugins.php/delorean/view/more",
+                data: {
+                    'offset': parseInt(jQuery("#offset").val(), 10) + parseInt(jQuery("#limit").val(), 10),
+                    'limit': jQuery("#limit").val(),
+                    'since': jQuery("#since").val(),
+                    'item_id': jQuery("#item_id").val(),
+                    'searchfor': jQuery("#searchfor").val(),
+                    'mkdate': jQuery("#mkdate").val(),
+                    'type': jQuery("#type").val()
+                },
+                dataType: "json",
+                success: function (response) {
+                    jQuery.each(response.versions, function (index, version) {
+                        jQuery("#sormversions tbody").append(version.html);
+                    });
+                    jQuery("#offset").val(parseInt(jQuery("#offset").val(), 10) + response.versions.length);
+                    if (response.more) {
+                        jQuery("#sormversions .loading").removeClass("loading").addClass("more");
+                    } else {
+                        jQuery("#sormversions .loading").remove();
+                    }
+                }
+            });
+        }
+    }, 30));
+</script>
 
 <?
 
