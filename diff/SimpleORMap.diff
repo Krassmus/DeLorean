@@ -1,12 +1,24 @@
 Index: SimpleORMap.class.php
 ===================================================================
---- SimpleORMap.class.php	(Revision 33542)
+--- SimpleORMap.class.php	(Revision 33590)
 +++ SimpleORMap.class.php	(Arbeitskopie)
-@@ -1652,6 +1660,7 @@
+@@ -1652,6 +1660,9 @@
          }
          $rel_ret = $this->storeRelations();
          $this->applyCallbacks('after_store');
-+        NotificationCenter::postNotification("SimpleORMapDidStore", $this);
++        if ($ret) {
++            NotificationCenter::postNotification("SimpleORMapDidStore", $this);
++        }
          if ($ret || $rel_ret) {
              $this->restore();
          }
+@@ -1758,6 +1769,9 @@
+                 $ret += DBManager::get()->exec($query);
+             }
+             $this->applyCallbacks('after_delete');
++            if ($ret) {
++                NotificationCenter::postNotification("SimpleORMapDidDelete", $this);
++            }
+         }
+         $this->setData(array(), true);
+         return $ret;

@@ -21,7 +21,7 @@
         </a>
     </td>
     <td>
-        <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog>
+        <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog="true">
             <?= Assets::img("icons/20/blue/info-circle", array('class' => "text-bottom")) ?>
         </a>
         <? if (!$version->isCurrentObject()) : ?>

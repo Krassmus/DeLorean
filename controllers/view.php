@@ -148,6 +148,19 @@ class ViewController extends PluginController {
         $this->redirect("delorean/view/all");
     }
 
+    public function file_action($id) {
+        $this->version = new SormVersion($id);
+        if (!$GLOBALS['perm']->have_perm("root") && ($this->version['user_id'] !== $GLOBALS['user']->id)) {
+            throw new AccessDeniedException("Kein Zugriff");
+        }
+        if ($this->version['original_file_path']) {
+            header("Content-Type: ".mime_content_type($this->version->getFilePath()));
+            echo file_get_contents($this->version->getFilePath());
+            die();
+        }
+        throw new Exception("No file.");
+    }
+
 
 
     protected function getVersions($params) {

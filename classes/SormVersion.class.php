@@ -32,7 +32,7 @@ class SormVersion extends SimpleORMap {
     {
         $this->registerCallback('before_store', 'cbSerializeData');
         $this->registerCallback('after_store after_initialize', 'cbUnserializeData');
-        $this->registerCallback('after_store', 'cbSaveFile');
+        $this->registerCallback('before_store', 'cbSaveFile');
         parent::__construct($id);
     }
 
@@ -52,8 +52,21 @@ class SormVersion extends SimpleORMap {
 
     function cbSaveFile()
     {
-        if ($this['original_file_path'] && file_exists($this['original_file_path'])) {
-            @copy($this['original_file_path'], $this->getFilePath());
+        if ($this['original_file_path']) {
+            $json_data = (json_decode($this['json_data'], true));
+            $previous = SormVersion::findOneBySQL("item_id = ? ORDER BY item_id DESC", array($json_data['id']));
+
+            if ($previous
+                    && $previous->getFilePath()
+                    && file_exists($previous->getFilePath())
+                    && file_exists($this['original_file_path'])
+                    && (md5_file($this['original_file_path']) === md5_file($previous->getFilePath()))
+                ) {
+                $this->content['file_id'] = $previous['file_id'];
+            } else {
+                $this->content['file_id'] = md5(uniqid());
+                @copy($this['original_file_path'], $this->getFilePath());
+            }
         }
         return true;
     }
@@ -61,7 +74,10 @@ class SormVersion extends SimpleORMap {
     public function delete() {
         parent::delete();
         if ($this['original_file_path'] && file_exists($this->getFilePath())) {
-            @unlink($this->getFilePath());
+            $another_version = SormVersion::countBySQL("file_id = ?", array($this['file_id']));
+            if (!$another_version) {
+                @unlink($this->getFilePath());
+            }
         }
     }
 
@@ -69,10 +85,10 @@ class SormVersion extends SimpleORMap {
         if (!file_exists(self::getFileDataPath())) {
             mkdir(self::getFileDataPath());
         }
-        if (!$this->getId()) {
-            $this->setId($this->getNewId());
+        if (!$this['file_id']) {
+            $this['file_id'] = md5(uniqid());
         }
-        return self::getFileDataPath()."/".$this->getId();
+        return self::getFileDataPath()."/".$this['file_id'];
     }
 
     public function invoke() {
@@ -94,7 +110,7 @@ class SormVersion extends SimpleORMap {
     }
 
     public function previousVersion() {
-        return SormVersion::findOneBySQL("item_id = :item_id AND version_id < :next_version_id", array(
+        return SormVersion::findOneBySQL("item_id = :item_id AND version_id < :next_version_id ORDER BY version_id DESC", array(
             'item_id' => $this['item_id'],
             'next_version_id' => $this->getId()
         ));

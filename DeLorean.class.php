@@ -25,8 +25,16 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             } else {
                 $version['json_data'] = null;
             }
-            if (is_a($sorm, "StudipDocument")) {
-                $version['original_file_path'] = get_upload_file_path($sorm->getId());
+            if (is_a($sorm, "StudipDocument")
+                    || (is_a($sorm, "File") && $sorm->getStorageObject())) {
+                if (is_a($sorm, "StudipDocument")) {
+                    $path = get_upload_file_path($sorm->getId());
+                } elseif (is_a($sorm, "File") && $sorm->getStorageObject()) {
+                    $path = $sorm->getStoragePath();
+                }
+                if ($path) {
+                    $version['original_file_path'] = $path;
+                }
             }
             $version->store();
         }

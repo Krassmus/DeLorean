@@ -11,6 +11,7 @@ class InitPlugin extends Migration {
                 `item_id` varchar(97) NOT NULL,
                 `json_data` text NOT NULL,
                 `original_file_path` varchar(100) NULL,
+                `file_id` varchar(100) NULL,
                 `mkdate` text NOT NULL,
                 PRIMARY KEY (`version_id`),
                 KEY `user_id` (`user_id`),
