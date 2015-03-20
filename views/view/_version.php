@@ -9,12 +9,18 @@
             <?= htmlReady($version['sorm_class']) ?>
         </a>
     </td>
+    <? if (!get_config("DELOREAN_ANONYMOUS_USERS")) : ?>
     <td>
-        <a href="<?= URLHelper::getLink("dispatch.php/profile", array('username' => get_username($version['user_id']))) ?>">
-            <?= Avatar::getAvatar($version['user_id'])->getImageTag(Avatar::SMALL) ?>
-            <?= htmlReady(get_fullname($version['user_id'])) ?>
-        </a>
+        <? if ($version['user_id']) : ?>
+            <a href="<?= URLHelper::getLink("dispatch.php/profile", array('username' => get_username($version['user_id']))) ?>">
+                <?= Avatar::getAvatar($version['user_id'])->getImageTag(Avatar::SMALL) ?>
+                <?= htmlReady(get_fullname($version['user_id'])) ?>
+            </a>
+        <? else : ?>
+            <?= _("unbekannt") ?>
+        <? endif ?>
     </td>
+    <? endif ?>
     <td>
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/second/".$version['mkdate']) ?>">
             <?= date("G:i d.n.Y", $version['mkdate']) ?>

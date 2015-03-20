@@ -9,6 +9,14 @@ class ViewController extends PluginController {
         parent::before_filter($action, $args);
         Navigation::activateItem("/admin/config/delorean");
         $this->internal_limit = 50;
+
+        $deleting = get_config("DELOREAN_SAVING_TIME");
+        if ($deleting) {
+            $old_versions = Sormversion::findBySQL("mkdate < ?", array(time() - $deleting));
+            foreach ($old_versions as $version) {
+                $version->delete();
+            }
+        }
     }
 
     public function all_action() {

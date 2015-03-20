@@ -17,7 +17,9 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
     public function versioning($event, $sorm) {
         if (SormVersion::isAllowed($sorm)) { //very important!
             $version = new SormVersion();
-            $version['user_id'] = $GLOBALS['user']->id;
+            if (!get_config("DELOREAN_ANONYMOUS_USERS")) {
+                $version['user_id'] = $GLOBALS['user']->id;
+            }
             $version['sorm_class'] = get_class($sorm);
             $version['item_id'] = $sorm->id;
             if ($event === "SimpleORMapDidStore") {

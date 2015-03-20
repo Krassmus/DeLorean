@@ -23,7 +23,9 @@
         <tr>
             <th></th>
             <th><?= _("Typ") ?></th>
+            <? if (!get_config("DELOREAN_ANONYMOUS_USERS")) : ?>
             <th><?= _("Veränderer") ?></th>
+            <? endif ?>
             <th><?= _("Datum") ?></th>
             <th></th>
         </tr>
