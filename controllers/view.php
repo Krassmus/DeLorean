@@ -10,11 +10,12 @@ class ViewController extends PluginController {
         Navigation::activateItem("/admin/config/delorean");
         $this->internal_limit = 50;
 
-        $deleting = get_config("DELOREAN_SAVING_TIME");
+        $deleting = get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS");
         if ($deleting) {
-            $old_versions = Sormversion::findBySQL("mkdate < ?", array(time() - $deleting));
+            $old_versions = Sormversion::findBySQL("user_id IS NOT NULL AND mkdate < ?", array(time() - $deleting));
             foreach ($old_versions as $version) {
-                $version->delete();
+                $version['user_id'] = null;
+                $version->store();
             }
         }
     }

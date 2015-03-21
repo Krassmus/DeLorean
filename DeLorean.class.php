@@ -17,7 +17,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
     public function versioning($event, $sorm) {
         if (SormVersion::isAllowed($sorm)) { //very important!
             $version = new SormVersion();
-            if (!get_config("DELOREAN_ANONYMOUS_USERS")) {
+            if (get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS") > 0) {
                 $version['user_id'] = $GLOBALS['user']->id;
             }
             $version['sorm_class'] = get_class($sorm);

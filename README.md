@@ -15,8 +15,7 @@ Man braucht zwei kleine Kernänderungen in der Form von Notifications, die man i
 * Man kann sich zu jedem gespeicherten SORM-Objekt die Inhalte anzeigen lassen. Änderungen gegenüber der Vorgängerversion werden hervorgehoben.
 * Man kann Änderungen wieder rückgängig machen also auf die letzte Version zurück gehen.
 * Dateien werden mitgespeichert und können ebenfalls wieder hergestellt werden.
-* Datenschutzmodus: Auf Wunsch kann eingestellt werden, dass die Verursacher der Änderung nicht mit protokolliert werden, damit keine Aktivitätsprofile erstellt werden können.
-* Speicherkontrolle: Standardmäßig werden Daten einen Monaten gespeichert und dann verworfen. Man kann aber auch kürzere oder längere Speicherzeiten einstellen oder das automatische Löschen auch ganz deaktivieren.
+* Datenschutz: Da eine Tabelle mit allen Nutzeraktivitäten aller Zeiten datenschutztechnisch bedenklich ist, werden die user_ids nach einem Zeitraum von einem Monat anonymisiert. Per Konfiguration kann dieser Wert auch beliebig nach oben oder auf 0 Sekunden gesetzt werden, um maximalen Datenschutz zu gewährleisten.
 * Besondere Views: Suche nach Inhalten, zeige alle zeitgleichen Änderungen an, zeige alle Änderungen von SORM-Klasse X an, zeige Historie nur dieses einen Objektes.
 
 ## Lizenz
