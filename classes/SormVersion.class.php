@@ -99,6 +99,31 @@ class SormVersion extends SimpleORMap {
         return $this->invokation;
     }
 
+    public function undo() {
+        $previous = $this->previousVersion();
+        if (!$previous) {
+            if ($this->invoke()) {
+                $this->invoke()->delete();
+                return "deleted";
+            } else {
+                return "nothing";
+            }
+        } else { //es gibt eine Vorgängerversion, auf die wir updaten können
+            $current = $this->invoke();
+
+            if (!$current) { //es gibt aber keine aktuelle Version mehr. Also bauen wir uns eine.
+                $class = $this['sorm_class'];
+                $current = new $class();
+            }
+            $current->setData($previous['json_data']);
+            $success = $current->store();
+            if ($success && $previous['original_file_path']) {
+                @copy($previous->getFilePath(), $previous['original_file_path']);
+            }
+            return "changed";
+        }
+    }
+
     public function isCurrentObject() {
         if (!isset($this['sorm_class']['chdate'])) {
             return false;

@@ -30,10 +30,11 @@
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog="true">
             <?= Assets::img("icons/20/blue/info-circle", array('class' => "text-bottom")) ?>
         </a>
-        <? if (!$version->isCurrentObject()) : ?>
-            <a href="<?= PluginEngine::getLink($plugin, array(), "view/undo/".$version->getId()) ?>" title="<?= _("Änderung rückgängig machen") ?>">
-                <?= Assets::img("icons/20/blue/archive2", array('class' => "text-bottom")) ?>
-            </a>
-        <? endif ?>
+        <a href="<?= PluginEngine::getLink($plugin, array(), "view/undo/".$version->getId()) ?>" title="<?= _("Änderung rückgängig machen") ?>">
+            <?= Assets::img("icons/20/blue/archive2", array('class' => "text-bottom")) ?>
+        </a>
+    </td>
+    <td>
+        <input type="checkbox" name="v[]" value="<?= htmlReady($version->getId()) ?>">
     </td>
 </tr>

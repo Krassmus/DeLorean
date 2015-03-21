@@ -23,6 +23,15 @@ class ViewController extends PluginController {
         if (!$GLOBALS['perm']->have_perm("root")) {
             throw new AccessDeniedException("Kein Zugriff");
         }
+        if (Request::isPost() && Request::submitted("undo_all")) {
+            $versions = SormVersion::findMany(Request::getArray("v"), "ORDER BY version_id DESC");
+            foreach ($versions as $v) {
+                $v->undo();
+            }
+            PageLayout::postMessage(MessageBox::success(sprintf(_("%s Versionen rückgängig gemacht."), count($versions))));
+            $this->redirect("delorean/view/all");
+            return;
+        }
         $params = array(
             'offset' => Request::int("offset", 0),
             'limit' => Request::int("limit", $this->internal_limit) + 1
@@ -127,33 +136,17 @@ class ViewController extends PluginController {
         if (!$GLOBALS['perm']->have_perm("root") && ($this->version['user_id'] !== $GLOBALS['user']->id)) {
             throw new AccessDeniedException("Kein Zugriff");
         }
-        $this->previous = $this->version->previousVersion();
-        if (!$this->previous) {
-            if ($this->version->invoke()) {
-                $this->version->invoke()->delete();
-                PageLayout::postMessage(MessageBox::success(_("Änderung wurde rückgängig gemacht, Objekt wurde gelöscht.")));
-            } else {
-                PageLayout::postMessage(MessageBox::info(_("Objekt hätte gelöscht werden müsse, war aber ohnehin nicht mehr da.")));
-            }
-        } else { //es gibt einer Vorgängerversion, auf die wir updaten können
-            $this->current = $this->version->invoke();
-
-            if (!$this->current) { //es gibt aber keine aktuelle Version mehr. Also bauen wir uns eine.
-                $class = $this->version['sorm_class'];
-                $this->current = new $class();
-            }
-            $this->current->setData($this->previous['json_data']);
-            $success = $this->current->store();
-            if ($success && $this->previous['original_file_path']) {
-                @copy($this->previous->getFilePath(), $this->previous['original_file_path']);
-            }
-            /*var_dump($success);
-            echo "\n\n<br><br><br>\n\n\n";
-            var_dump($this->current);
-            die();*/
+        $success = $this->version->undo();
+        if ($success === "deleted") {
+            PageLayout::postMessage(MessageBox::success(_("Änderung wurde rückgängig gemacht, Objekt wurde gelöscht.")));
+        }
+        if ($success === "nothing") {
+            PageLayout::postMessage(MessageBox::info(_("Objekt hätte gelöscht werden müsse, war aber ohnehin nicht mehr da.")));
+        }
+        if ($success === "changed") {
             PageLayout::postMessage(MessageBox::success(_("Änderung an Objekt rückgängig gemacht.")));
         }
-        $this->redirect("delorean/view/all");
+        $this->redirect("view/all");
     }
 
     public function file_action($id) {

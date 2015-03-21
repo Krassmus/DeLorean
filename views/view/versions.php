@@ -1,50 +1,58 @@
-<form method="get" action="?">
+<form action="<?= PluginEngine::getLink($plugin, array(), "view/all") ?>" method="post">
+
+    <input type="hidden" id="offset" value="<?= Request::int("offset", 0) ?>">
+    <input type="hidden" id="limit" value="<?= $internal_limit ?>">
+    <input type="hidden" id="since" value="<?= time() ?>">
+    <? if ($item_id) : ?>
+        <input type="hidden" id="item_id" value="<?= htmlReady($item_id) ?>">
+    <? endif ?>
+    <? if ($searchfor) : ?>
+        <input type="hidden" id="searchfor" value="<?= htmlReady($searchfor) ?>">
+    <? endif ?>
+    <? if ($mkdate) : ?>
+        <input type="hidden" id="mkdate" value="<?= htmlReady($mkdate) ?>">
+    <? endif ?>
+    <? if ($type) : ?>
+        <input type="hidden" id="type" value="<?= htmlReady($type) ?>">
+    <? endif ?>
+
+    <div style="float: right;">
+        <?= \Studip\Button::create(_("Ausgewählte rückgängig machen"), "undo_all") ?>
+    </div>
+    <div style="clear: both;"></div>
+
+    <table class="default" id="sormversions">
+        <thead>
+            <tr>
+                <th></th>
+                <th><?= _("Typ") ?></th>
+                <? if (!get_config("DELOREAN_ANONYMOUS_USERS")) : ?>
+                <th><?= _("Veränderer") ?></th>
+                <? endif ?>
+                <th><?= _("Datum") ?></th>
+                <th></th>
+                <th>
+                    <input type="checkbox" data-proxyfor=":checkbox[name^=v]" aria-label="<?= _("Alle auswählen/abwählen") ?>" title="<?= _("Alle auswählen/abwählen") ?>">
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <? foreach ($versions as $version) : ?>
+                <?= $this->render_partial("view/_version.php", array('version' => $version)) ?>
+            <? endforeach ?>
+        </tbody>
+        <tfoot>
+        <? if ($more) : ?>
+            <tr class="more">
+                <td colspan="6" style="text-align: center">
+                    <?= Assets::img("ajax-indicator-black.svg") ?>
+                </td>
+            </tr>
+        <? endif ?>
+        </tfoot>
+    </table>
 
 </form>
-
-<input type="hidden" id="offset" value="<?= Request::int("offset", 0) ?>">
-<input type="hidden" id="limit" value="<?= $internal_limit ?>">
-<input type="hidden" id="since" value="<?= time() ?>">
-<? if ($item_id) : ?>
-    <input type="hidden" id="item_id" value="<?= htmlReady($item_id) ?>">
-<? endif ?>
-<? if ($searchfor) : ?>
-    <input type="hidden" id="searchfor" value="<?= htmlReady($searchfor) ?>">
-<? endif ?>
-<? if ($mkdate) : ?>
-    <input type="hidden" id="mkdate" value="<?= htmlReady($mkdate) ?>">
-<? endif ?>
-<? if ($type) : ?>
-    <input type="hidden" id="type" value="<?= htmlReady($type) ?>">
-<? endif ?>
-
-<table class="default" id="sormversions">
-    <thead>
-        <tr>
-            <th></th>
-            <th><?= _("Typ") ?></th>
-            <? if (!get_config("DELOREAN_ANONYMOUS_USERS")) : ?>
-            <th><?= _("Veränderer") ?></th>
-            <? endif ?>
-            <th><?= _("Datum") ?></th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        <? foreach ($versions as $version) : ?>
-            <?= $this->render_partial("view/_version.php", array('version' => $version)) ?>
-        <? endforeach ?>
-    </tbody>
-    <tfoot>
-    <? if ($more) : ?>
-        <tr class="more">
-            <td colspan="5" style="text-align: center">
-                <?= Assets::img("ajax-indicator-black.svg") ?>
-            </td>
-        </tr>
-    <? endif ?>
-    </tfoot>
-</table>
 
 <script>
     //Infinity-scroll:
