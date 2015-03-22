@@ -26,4 +26,15 @@ class InitPlugin extends Migration {
         ");
     }
 
+    public function down() {
+        DBManager::get()->exec("DROP TABLE `sorm_versions` ");
+        $folder = $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
+
+        $files = array_diff(scandir($folder), array('.', '..'));
+        foreach ($files as $file) {
+            unlink($folder . "/" . $file);
+        }
+        rmdir($folder);
+    }
+
 }
