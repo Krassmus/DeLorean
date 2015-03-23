@@ -9,7 +9,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
         NotificationCenter::addObserver($this, "versioning", "SimpleORMapDidStore");
         NotificationCenter::addObserver($this, "versioning", "SimpleORMapDidDelete");
         if ($GLOBALS['perm']->have_perm("root")) {
-            $navigation = new Navigation(_("DeLorean-Wiederherstellung"), PluginEngine::getURL($this, array(), "view/all"));
+            $navigation = new Navigation(_("DeLorean-Wiederherstellungsmaschine"), PluginEngine::getURL($this, array(), "view/all"));
             Navigation::addItem("/admin/config/delorean", $navigation);
         }
     }

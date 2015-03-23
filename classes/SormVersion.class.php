@@ -22,6 +22,30 @@ class SormVersion extends SimpleORMap {
         return true;
     }
 
+    static public function getAllocatedSpace() {
+        $statement = DBManager::get()->prepare("
+            SELECT
+                DATA_LENGTH,
+                INDEX_LENGTH
+            FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = :db
+                AND TABLE_NAME = 'sorm_versions'
+        ");
+        $statement->execute(array(
+            'db' => $GLOBALS['DB_STUDIP_DATABASE']
+        ));
+        $data = $statement->fetch(PDO::FETCH_ASSOC);
+
+        $filesize = 0;
+        $folder = self::getFileDataPath();
+        $files = array_diff(scandir($folder), array('.', '..'));
+        foreach ($files as $file) {
+            $filesize += filesize($folder . "/" . $file);
+        }
+
+        return $data['DATA_LENGTH'] + $data['INDEX_LENGTH'] + $filesize;
+    }
+
     protected static function configure($config = array())
     {
         $config['db_table'] = 'sorm_versions';

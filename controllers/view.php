@@ -46,6 +46,9 @@ class ViewController extends PluginController {
             array_pop($this->versions);
             $this->more = true;
         }
+
+        $this->size = Sormversion::getAllocatedSpace();
+
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -101,6 +104,7 @@ class ViewController extends PluginController {
             $this->more = true;
         }
         $this->item_id = $item_id;
+        $this->size = Sormversion::getAllocatedSpace();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -115,6 +119,7 @@ class ViewController extends PluginController {
             array_pop($this->versions);
             $this->more = true;
         }
+        $this->size = Sormversion::getAllocatedSpace();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -129,6 +134,7 @@ class ViewController extends PluginController {
             array_pop($this->versions);
             $this->more = true;
         }
+        $this->size = Sormversion::getAllocatedSpace();
         $this->render_template("view/versions.php", $this->layout);
     }
 

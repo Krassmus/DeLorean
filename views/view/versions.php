@@ -94,3 +94,5 @@
 $search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/all"));
 $search->addNeedle(_("ID, Eigenschaft, Zeitstempel"), "searchfor", true);
 Sidebar::Get()->addWidget($search);
+
+Helpbar::Get()->addPlainText(_("Speicherplatz"), sprintf(_("Die gespeicherten Datenbankeinträge plus Dateien nehmen %s MB ein."), floor($size / (1024 * 1024))));
