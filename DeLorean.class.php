@@ -21,7 +21,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
                 $version['user_id'] = $GLOBALS['user']->id;
             }
             $version['sorm_class'] = get_class($sorm);
-            $version['item_id'] = $sorm->id;
+            $version['item_id'] = $sorm->id ?: $sorm->getId();
             if ($event === "SimpleORMapDidStore") {
                 $version['json_data'] = $sorm->toArray();
             } elseif($event === "SimpleORMapDidDelete") {
