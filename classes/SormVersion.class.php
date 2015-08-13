@@ -7,7 +7,11 @@ class SormVersion extends SimpleORMap {
         "Message", "MessageUser", "UserConfigEntry");
 
     static public function getFileDataPath() {
-        return $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
+        $folder = $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
+        if (!file_exists($folder)) {
+            mkdir($folder);
+        }
+        return $folder;
     }
 
     static public function isAllowed($class) {

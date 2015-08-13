@@ -37,9 +37,15 @@
             </tr>
         </thead>
         <tbody>
-            <? foreach ($versions as $version) : ?>
-                <?= $this->render_partial("view/_version.php", array('version' => $version)) ?>
-            <? endforeach ?>
+            <? if (count($versions)) : ?>
+                <? foreach ($versions as $version) : ?>
+                    <?= $this->render_partial("view/_version.php", array('version' => $version)) ?>
+                <? endforeach ?>
+            <? else : ?>
+            <tr>
+                <td colspan="6" style="text-align: center;"><?= _("Noch wurden keine Änderungen am System erkannt. Falls sich das nicht bald ändert (zum Beispiel nach Erstellen eines Testblubber) haben Sie sicherlich vergessen, das diff in der Klasse SimpleORMap einzuspielen. Dieses diff finden Sie in dem Pluginordner des DeLoreans.") ?></td>
+            </tr>
+            <? endif ?>
         </tbody>
         <tfoot>
         <? if ($more) : ?>
