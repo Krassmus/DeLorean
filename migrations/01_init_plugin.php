@@ -5,7 +5,7 @@ class InitPlugin extends Migration {
     public function up() {
         DBManager::get()->exec("
             CREATE TABLE `sorm_versions` (
-                `version_id` varchar(32) NOT NULL,
+                `version_id` bigint(20) NOT NULL AUTO_INCREMENT,
                 `user_id` varchar(32) NULL,
                 `sorm_class` varchar(128) NOT NULL,
                 `item_id` varchar(97) NOT NULL,

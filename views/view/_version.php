@@ -23,7 +23,7 @@
     <? endif ?>
     <td>
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/second/".$version['mkdate']) ?>">
-            <?= date("G:i d.n.Y", $version['mkdate']) ?>
+            <?= date("d.m.Y H:i:s", $version['mkdate']) ?>
         </a>
     </td>
     <td>
