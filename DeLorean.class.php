@@ -41,6 +41,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
                 }
             }
             $version->store();
+            //var_dump($version); die();
         }
         return true;
     }

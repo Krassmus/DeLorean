@@ -28,10 +28,10 @@
     </td>
     <td>
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog="true">
-            <?= Assets::img("icons/20/blue/info-circle", array('class' => "text-bottom")) ?>
+            <?= Icon::create("info-circle", "clickable")->asImg(20, array('class' => "text-bottom")) ?>
         </a>
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/undo/".$version->getId()) ?>" title="<?= _("Änderung rückgängig machen") ?>">
-            <?= Assets::img("icons/20/blue/archive2", array('class' => "text-bottom")) ?>
+            <?= Icon::create("archive2", "clickable")->asImg(20, array('class' => "text-bottom")) ?>
         </a>
     </td>
     <td>

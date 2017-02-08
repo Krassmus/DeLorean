@@ -53,13 +53,14 @@ class SormVersion extends SimpleORMap {
     protected static function configure($config = array())
     {
         $config['db_table'] = 'sorm_versions';
+        $config['serialized_fields']['json_data'] = 'JSONArrayObject';
         parent::configure($config);
     }
 
     function __construct($id = null)
     {
-        $this->registerCallback('before_store', 'cbSerializeData');
-        $this->registerCallback('after_store after_initialize', 'cbUnserializeData');
+        //$this->registerCallback('before_store', 'cbSerializeData');
+        //$this->registerCallback('after_store after_initialize', 'cbUnserializeData');
         $this->registerCallback('before_store', 'cbSaveFile');
         parent::__construct($id);
     }
