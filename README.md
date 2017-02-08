@@ -8,7 +8,7 @@ Mit diesem Plugin werden alle Objekte in Stud.IP, die verändert oder gelöscht 
 
 Technisch werden alle Objekte, die von der Klasse SimpleORMap abgeleitet sind, in einer extra Tabelle gespeichert.
 
-Man braucht zwei kleine Kernänderungen in der Form von Notifications, die man in die Klasse SimpleORMap einbauen muss, damit dieses Plugin funktionieren kann.
+Ab der Stud.IP-Version 4.0 funktioniert das Plugin frei Haus. In Stud.IP-Versionen vor 4.0 braucht man zwei kleine Kernänderungen in der Form von Notifications, die man in die Klasse SimpleORMap einbauen muss, damit dieses Plugin funktionieren kann.
 
 ## Features
 
@@ -23,5 +23,5 @@ Man braucht zwei kleine Kernänderungen in der Form von Notifications, die man i
 Das Plugin steht unter "GPL 2 or later" und der Mozilla Public License Version 2. 
 Das obige Bild eines DeLorean DMC-12 steht unter Creative Commons Attribution-Share Alike 4.0 und stammt vom Wikipedia-User Terabass, siehe hier http://en.wikipedia.org/wiki/File:TeamTimeCar.com-BTTF_DeLorean_Time_Machine-OtoGodfrey.com-JMortonPhoto.com-07.jpg
 
-Der Name LeLorean hat kein aktives Trademark und kann frei verwendet werden.
+Der Name DeLorean hat kein aktives Trademark und kann frei verwendet werden.
 

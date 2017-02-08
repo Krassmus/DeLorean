@@ -12,12 +12,16 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             $navigation = new Navigation(_("DeLorean-Wiederherstellungsmaschine"), PluginEngine::getURL($this, array(), "view/all"));
             Navigation::addItem("/admin/config/delorean", $navigation);
         }
+        if (Navigation::hasItem("/profile") && $GLOBALS['perm']->have_perm("autor") && !get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS")) {
+            $nav = new Navigation(_("Rückgängig"), PluginEngine::getURL($this, array(), "undo/overview"));
+            Navigation::addItem("/profile/delorean", $nav);
+        }
     }
 
     public function versioning($event, $sorm) {
         if (SormVersion::isAllowed($sorm)) { //very important!
             $version = new SormVersion();
-            if (get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS") > 0) {
+            if (!get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS")) {
                 $version['user_id'] = $GLOBALS['user']->id;
             }
             $version['sorm_class'] = get_class($sorm);
