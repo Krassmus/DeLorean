@@ -14,7 +14,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
         }
         if (Navigation::hasItem("/profile") && $GLOBALS['perm']->have_perm("autor") && !get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS")) {
             $nav = new Navigation(_("Rückgängig"), PluginEngine::getURL($this, array(), "undo/overview"));
-            Navigation::addItem("/profile/delorean", $nav);
+            //Navigation::addItem("/profile/delorean", $nav);
         }
     }
 
