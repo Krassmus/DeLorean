@@ -8,11 +8,11 @@ class UndoController extends PluginController {
     {
         parent::before_filter($action, $args);
         Navigation::activateItem("/profile/delorean");
-        $this->internal_limit = 50;
+        $this->internal_limit = 30;
 
         $deleting = get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS");
         if ($deleting) {
-            $old_versions = Sormversion::findBySQL("user_id IS NOT NULL AND mkdate < ?", array(time() - $deleting));
+            $old_versions = Sormversion::findBySQL("user_id IS NOT NULL AND mkdate < ? LIMIT 100", array(time() - $deleting));
             foreach ($old_versions as $version) {
                 $version['user_id'] = null;
                 $version->store();
@@ -22,7 +22,7 @@ class UndoController extends PluginController {
 
     public function overview_action()
     {
-        $this->versions = SormVersion::findBySQL("user_id = ? ORDER BY version_id DESC LIMIT 20", array($GLOBALS['user']->id));
+        $this->versions = SormVersion::findBySQL("user_id = ? ORDER BY version_id DESC LIMIT ".$this->internal_limit, array($GLOBALS['user']->id));
     }
 
     public function undo_action($id) {
