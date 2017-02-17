@@ -12,11 +12,13 @@ class ViewController extends PluginController {
 
         $deleting = get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS");
         if ($deleting) {
-            $old_versions = Sormversion::findBySQL("user_id IS NOT NULL AND mkdate < ? LIMIT 100", array(time() - $deleting));
-            foreach ($old_versions as $version) {
-                $version['user_id'] = null;
-                $version->store();
-            }
+            $statement = DBManager::get()->prepare("
+                UPDATE sorm_versions
+                SET user_id = null
+                WHERE user_id IS NOT NULL
+                    AND mkdate < UNIX_TIMESTAMP() - ?
+            ");
+            $statement->execute(array($deleting));
         }
     }
 
@@ -204,7 +206,7 @@ class ViewController extends PluginController {
             $constraints[] = "1=1";
         }
         return SormVersion::findBySQL(
-            implode(" AND ", $constraints)." ORDER BY version_id DESC LIMIT ".(int) $params['offset'].", ".(int) $params['limit'],
+            implode(" AND ", $constraints)." ORDER BY mkdate DESC, version_id DESC LIMIT ".(int) $params['offset'].", ".(int) $params['limit'],
             $parameter
         );
     }
