@@ -1,5 +1,5 @@
 <? $previous = $version->previousVersion() ?>
-<? if ($version['json_data'] == null) : ?>
+<? if (($version['json_data'] == null) OR (empty($this->version['json_data']->getArrayCopy()))) : ?>
     <?= MessageBox::info(_("Das Objekt wurde in dieser Aktion gelöscht.")) ?>
 <? else : ?>
     <? if (!$previous) : ?>

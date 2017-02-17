@@ -2,4 +2,4 @@ pluginname=DeLorean-Wiederherstellungsmaschine
 pluginclassname=DeLorean
 version=1.1
 origin=RasmusFuhse
-studipMinVersion=3.5
+studipMinVersion=3.2
