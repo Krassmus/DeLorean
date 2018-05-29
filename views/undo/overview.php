@@ -4,7 +4,7 @@
             <th><?= _("Objekt-Typ") ?></th>
             <th><?= _("Name") ?></th>
             <th><?= _("Zeitpunkt") ?></th>
-            <th><?= _("Rückgängig machen") ?></th>
+            <th><?= _("RÃ¼ckgÃ¤ngig machen") ?></th>
         </tr>
     </thead>
     <tbody>
@@ -14,8 +14,8 @@
                     <?= htmlReady($version['sorm_class']) ?>
                 </td>
                 <td>
-                    <? if ($version['json_data'] == null) : ?>
-                        <?= Assets::img("icons/20/grey/trash", array('class' => "text-bottom", 'title' => _("Objekt wurde gelöscht"))) ?>
+                    <? if ($version['delete']) : ?>
+                        <?= Assets::img("icons/20/grey/trash", array('class' => "text-bottom", 'title' => _("Objekt wurde gelÃ¶scht"))) ?>
                     <? else : ?>
                         <? $name = $version['json_data']['description'] ?: $version['json_data']['name'];
                         if (!$name) {
@@ -34,7 +34,7 @@
                 </td>
                 <td>
                     <form action="<?= PluginEngine::getLink($plugin, array(), "undo/undo/".$version->getId()) ?>" method="post" style="display: inline;">
-                        <button style="border: none; background: none; cursor: pointer;" title="<?= _("Änderung rückgängig machen") ?>">
+                        <button style="border: none; background: none; cursor: pointer;" title="<?= _("Ã„nderung rÃ¼ckgÃ¤ngig machen") ?>">
                             <?= Assets::img("icons/20/blue/archive2", array('class' => "text-bottom")) ?>
                         </button>
                     </form>

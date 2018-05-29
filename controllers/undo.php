@@ -10,7 +10,15 @@ class UndoController extends PluginController {
         Navigation::activateItem("/profile/delorean");
         $this->internal_limit = 30;
 
-        $deleting = get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS");
+        $deleting = Config::get()->DELOREAN_DELETE_MEMORY;
+        if ($deleting) {
+            $statement = DBManager::get()->prepare("
+                DELETE sorm_versions
+                WHERE mkdate < UNIX_TIMESTAMP() - ?
+            ");
+            $statement->execute(array($deleting * 86400));
+        }
+        $deleting = Config::get()->DELOREAN_MAKE_USERIDS_ANONYMOUS;
         if ($deleting) {
             $statement = DBManager::get()->prepare("
                 UPDATE sorm_versions
@@ -34,13 +42,13 @@ class UndoController extends PluginController {
         }
         $success = $this->version->undo();
         if ($success === "deleted") {
-            PageLayout::postMessage(MessageBox::success(_("Änderung wurde rückgängig gemacht, Objekt wurde gelöscht.")));
+            PageLayout::postMessage(MessageBox::success(_("Ã„nderung wurde rÃ¼ckgÃ¤ngig gemacht, Objekt wurde gelÃ¶scht.")));
         }
         if ($success === "nothing") {
-            PageLayout::postMessage(MessageBox::info(_("Objekt hätte gelöscht werden müsse, war aber ohnehin nicht mehr da.")));
+            PageLayout::postMessage(MessageBox::info(_("Objekt hÃ¤tte gelÃ¶scht werden mÃ¼sse, war aber ohnehin nicht mehr da.")));
         }
         if ($success === "changed") {
-            PageLayout::postMessage(MessageBox::success(_("Änderung an Objekt rückgängig gemacht.")));
+            PageLayout::postMessage(MessageBox::success(_("Ã„nderung an Objekt rÃ¼ckgÃ¤ngig gemacht.")));
         }
         $this->redirect("undo/overview");
     }

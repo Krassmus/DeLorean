@@ -9,7 +9,7 @@
             <?= htmlReady($version['sorm_class']) ?>
         </a>
     </td>
-    <? if (!get_config("DELOREAN_ANONYMOUS_USERS")) : ?>
+    <? if (!Config::get()->DELOREAN_ANONYMOUS_USERS) : ?>
     <td>
         <? if ($version['user_id']) : ?>
             <a href="<?= URLHelper::getLink("dispatch.php/profile", array('username' => get_username($version['user_id']))) ?>">
@@ -26,19 +26,15 @@
             <?= date("d.m.Y H:i:s", $version['mkdate']) ?>
         </a>
     </td>
-    <td>
+    <td class="actions">
+        <?= Icon::create($version['delete'] ? "trash" : ($version['create'] ? "star" : "edit"), "inactive")
+                ->asImg(20, array('class' => "text-bottom", 'title' => $version['delete'] ? _("Objekt wurde gelÃ¶scht.") : ($version['create'] ? _("Objekt wurde erzeugt.") : _("Objekt wurde bearbeitet")))) ?>
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog="true">
-            <?= version_compare($GLOBALS['SOFTWARE_VERSION'], "3.4", ">=")
-                ? Icon::create("info-circle", "clickable")->asImg(20, array('class' => "text-bottom"))
-                : Assets::img("icons/20/blue/info-circle", array('class' => "text-bottom")) ?>
+            <?= Icon::create("info-circle", "clickable")->asImg(20, array('class' => "text-bottom")) ?>
         </a>
-        <a href="<?= PluginEngine::getLink($plugin, array(), "view/undo/".$version->getId()) ?>" title="<?= _("Änderung rückgängig machen") ?>">
-            <?= version_compare($GLOBALS['SOFTWARE_VERSION'], "3.4", ">=")
-                ? Icon::create("archive2", "clickable")->asImg(20, array('class' => "text-bottom"))
-                : Assets::img("icons/20/blue/archive2", array('class' => "text-bottom")) ?>
+        <a href="<?= PluginEngine::getLink($plugin, array(), "view/undo/".$version->getId()) ?>" title="<?= _("Ã„nderung rÃ¼ckgÃ¤ngig machen") ?>">
+            <?= Icon::create("archive2", "clickable")->asImg(20, array('class' => "text-bottom")) ?>
         </a>
-    </td>
-    <td>
         <input type="checkbox" name="v[]" value="<?= htmlReady($version->getId()) ?>">
     </td>
 </tr>

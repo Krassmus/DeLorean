@@ -54,36 +54,16 @@ class SormVersion extends SimpleORMap {
     {
         $config['db_table'] = 'sorm_versions';
         $config['serialized_fields']['json_data'] = 'JSONArrayObject';
+        $config['registered_callbacks']['before_store'][]     = 'cbSaveFile';
         parent::configure($config);
-    }
-
-    function __construct($id = null)
-    {
-        //$this->registerCallback('before_store', 'cbSerializeData');
-        //$this->registerCallback('after_store after_initialize', 'cbUnserializeData');
-        $this->registerCallback('before_store', 'cbSaveFile');
-        parent::__construct($id);
-    }
-
-    function cbSerializeData()
-    {
-        $this->content['json_data'] = json_encode(studip_utf8encode($this->content['json_data']));
-        $this->content_db['json_data'] = json_encode(studip_utf8encode($this->content_db['json_data']));
-        return true;
-    }
-
-    function cbUnserializeData()
-    {
-        $this->content['json_data'] = (array) studip_utf8decode(json_decode($this->content['json_data'], true));
-        $this->content_db['json_data'] = (array) studip_utf8decode(json_decode($this->content_db['json_data'], true));
-        return true;
     }
 
     function cbSaveFile()
     {
         if ($this['original_file_path']) {
-            $json_data = (json_decode($this['json_data'], true));
-            $previous = SormVersion::findOneBySQL("item_id = ? ORDER BY item_id DESC", array($json_data['id']));
+            $previous = SormVersion::findOneBySQL("item_id = ? ORDER BY item_id DESC", array(
+                $this->json_data['id']
+            ));
 
             if ($previous
                     && $previous->getFilePath()
@@ -124,30 +104,36 @@ class SormVersion extends SimpleORMap {
         if ($this->invokation === null) {
             $class = $this['sorm_class'];
             $this->invokation = new $class($this['item_id']);
+            if ($this->invokation->isNew()) {
+                $this->invokation->setId($this['item_id']);
+            }
         }
         return $this->invokation;
     }
 
     public function undo() {
-        $previous = $this->previousVersion();
-        if (!$previous) {
+        if ($this['create']) {
             if ($this->invoke()) {
                 $this->invoke()->delete();
                 return "deleted";
             } else {
                 return "nothing";
             }
-        } else { //es gibt eine Vorgängerversion, auf die wir updaten können
+        } else { //es gibt eine VorgÃ¤ngerversion, auf die wir updaten kÃ¶nnen
             $current = $this->invoke();
 
             if (!$current) { //es gibt aber keine aktuelle Version mehr. Also bauen wir uns eine.
                 $class = $this['sorm_class'];
                 $current = new $class();
             }
-            $current->setData($previous['json_data']);
+            $current->setData($this['json_data']->getArrayCopy());
             $success = $current->store();
-            if ($success && $previous['original_file_path']) {
-                @copy($previous->getFilePath(), $previous['original_file_path']);
+            if ($success && $this['original_file_path']) {
+                var_dump($this['original_file_path']);
+                var_dump($this->getFilePath());
+                var_dump(file_exists($this['original_file_path']));
+                var_dump(file_exists($this->getFilePath()));
+                @copy($this->getFilePath(), $this['original_file_path']);
             }
             return "changed";
         }
@@ -165,6 +151,12 @@ class SormVersion extends SimpleORMap {
 
     public function previousVersion() {
         return SormVersion::findOneBySQL("item_id = :item_id AND version_id < :next_version_id ORDER BY version_id DESC", array(
+            'item_id' => $this['item_id'],
+            'next_version_id' => $this->getId()
+        ));
+    }
+    public function nextVersion() {
+        return SormVersion::findOneBySQL("item_id = :item_id AND version_id > :next_version_id ORDER BY version_id ASC", array(
             'item_id' => $this['item_id'],
             'next_version_id' => $this->getId()
         ));

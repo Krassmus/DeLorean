@@ -19,11 +19,13 @@ class InitPlugin extends Migration {
                 KEY `item_id` (`item_id`)
             ) ENGINE=InnoDB
         ");
-        DBManager::get()->exec("
-        INSERT IGNORE INTO `config` (`config_id`, `parent_id`, `field`, `value`, `is_default`, `type`, `range`, `section`, `position`, `mkdate`, `chdate`, `description`, `comment`, `message_template`)
-        VALUES
-            ('4cdb0c9bbd2d869b71e4a354c4ae2cb1', '', 'DELOREAN_MAKE_USERIDS_ANONYMOUS', 86400 * 30, 0, 'integer', 'global', 'DELOREAN', 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 'After how many seconds should the users in the version-table be anonymized? This is for privacy-concerns.', '', '')
-        ");
+        Config::get()->create("DELOREAN_MAKE_USERIDS_ANONYMOUS", array(
+            'value' => 86400 * 30,
+            'type' => "integer",
+            'range' => "global",
+            'section' => "DELOREAN",
+            'description' => "After how many seconds should the users in the version-table be anonymized? This is for privacy-concerns."
+        ));
     }
 
     public function down() {
@@ -35,6 +37,7 @@ class InitPlugin extends Migration {
             unlink($folder . "/" . $file);
         }
         rmdir($folder);
+        Config::get()->delete("DELOREAN_MAKE_USERIDS_ANONYMOUS");
     }
 
 }

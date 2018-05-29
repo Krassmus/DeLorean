@@ -10,7 +10,11 @@ class ViewController extends PluginController {
         Navigation::activateItem("/admin/config/delorean");
         $this->internal_limit = 30;
 
-        $deleting = get_config("DELOREAN_MAKE_USERIDS_ANONYMOUS");
+        $deleting = Config::get()->DELOREAN_DELETE_MEMORY;
+        if ($deleting) {
+            SormVersion::deleteBySQL("mkdate < UNIX_TIMESTAMP() - ?", array($deleting * 86400));
+        }
+        $deleting = Config::get()->DELOREAN_MAKE_USERIDS_ANONYMOUS;
         if ($deleting) {
             $statement = DBManager::get()->prepare("
                 UPDATE sorm_versions
@@ -27,12 +31,12 @@ class ViewController extends PluginController {
             throw new AccessDeniedException("Kein Zugriff");
         }
         if (Request::isPost() && Request::submitted("undo_all")) {
-            $versions = SormVersion::findMany(Request::getArray("v"), "ORDER BY version_id DESC");
-            foreach ($versions as $v) {
-                $v->undo();
+            $versions = SormVersion::findMany(array_reverse(Request::getArray("v")), "ORDER BY version_id DESC");
+            foreach ($versions as $version) {
+                $version->undo();
             }
-            PageLayout::postMessage(MessageBox::success(sprintf(_("%s Versionen rückgängig gemacht."), count($versions))));
-            $this->redirect("delorean/view/all");
+            PageLayout::postMessage(MessageBox::success(sprintf(_("%s Versionen rÃ¼ckgÃ¤ngig gemacht."), count($versions))));
+            $this->redirect("view/all");
             return;
         }
         $params = array(
@@ -147,13 +151,13 @@ class ViewController extends PluginController {
         }
         $success = $this->version->undo();
         if ($success === "deleted") {
-            PageLayout::postMessage(MessageBox::success(_("Änderung wurde rückgängig gemacht, Objekt wurde gelöscht.")));
+            PageLayout::postMessage(MessageBox::success(_("Ã„nderung wurde rÃ¼ckgÃ¤ngig gemacht, Objekt wurde gelÃ¶scht.")));
         }
         if ($success === "nothing") {
-            PageLayout::postMessage(MessageBox::info(_("Objekt hätte gelöscht werden müsse, war aber ohnehin nicht mehr da.")));
+            PageLayout::postMessage(MessageBox::info(_("Objekt hÃ¤tte gelÃ¶scht werden mÃ¼sse, war aber ohnehin nicht mehr da.")));
         }
         if ($success === "changed") {
-            PageLayout::postMessage(MessageBox::success(_("Änderung an Objekt rückgängig gemacht.")));
+            PageLayout::postMessage(MessageBox::success(_("Ã„nderung an Objekt rÃ¼ckgÃ¤ngig gemacht.")));
         }
         $this->redirect("view/all");
     }

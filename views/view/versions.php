@@ -17,7 +17,7 @@
     <? endif ?>
 
     <div style="float: right;">
-        <?= \Studip\Button::create(_("Ausgew‰hlte r¸ckg‰ngig machen"), "undo_all") ?>
+        <?= \Studip\Button::create(_("Ausgew√§hlte r√ºckg√§ngig machen"), "undo_all") ?>
     </div>
     <div style="clear: both;"></div>
 
@@ -26,13 +26,12 @@
             <tr>
                 <th></th>
                 <th><?= _("Typ") ?></th>
-                <? if (!get_config("DELOREAN_ANONYMOUS_USERS")) : ?>
-                <th><?= _("Ver‰nderer") ?></th>
+                <? if (!Config::get()->DELOREAN_ANONYMOUS_USERS) : ?>
+                <th><?= _("Ver√§nderer") ?></th>
                 <? endif ?>
                 <th><?= _("Datum") ?></th>
-                <th></th>
-                <th>
-                    <input type="checkbox" data-proxyfor=":checkbox[name^=v]" aria-label="<?= _("Alle ausw‰hlen/abw‰hlen") ?>" title="<?= _("Alle ausw‰hlen/abw‰hlen") ?>">
+                <th class="actions">
+                    <input type="checkbox" data-proxyfor=":checkbox[name^=v]" aria-label="<?= _("Alle ausw√§hlen/abw√§hlen") ?>" title="<?= _("Alle ausw√§hlen/abw√§hlen") ?>">
                 </th>
             </tr>
         </thead>
@@ -43,7 +42,7 @@
                 <? endforeach ?>
             <? else : ?>
             <tr>
-                <td colspan="6" style="text-align: center;"><?= _("Noch wurden keine ƒnderungen am System erkannt. Falls sich das nicht bald ‰ndert (zum Beispiel nach Erstellen eines Testblubber) haben Sie sicherlich vergessen, das diff in der Klasse SimpleORMap einzuspielen. Dieses diff finden Sie in dem Pluginordner des DeLoreans.") ?></td>
+                <td colspan="6" style="text-align: center;"><?= _("Noch wurden keine √Ñnderungen am System erkannt. Falls sich das nicht bald √§ndert (zum Beispiel nach Erstellen eines Testblubber) haben Sie sicherlich vergessen, das diff in der Klasse SimpleORMap einzuspielen. Dieses diff finden Sie in dem Pluginordner des DeLoreans.") ?></td>
             </tr>
             <? endif ?>
         </tbody>
@@ -101,4 +100,4 @@ $search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/all"));
 $search->addNeedle(_("ID, Eigenschaft, Zeitstempel"), "searchfor", true);
 Sidebar::Get()->addWidget($search);
 
-Helpbar::Get()->addPlainText(_("Speicherplatz"), sprintf(_("Die gespeicherten Datenbankeintr‰ge plus Dateien nehmen %s MB ein."), floor($size / (1024 * 1024))));
+Helpbar::Get()->addPlainText(_("Speicherplatz"), sprintf(_("Die gespeicherten Datenbankeintr√§ge plus Dateien nehmen %s MB ein."), floor($size / (1024 * 1024))));
