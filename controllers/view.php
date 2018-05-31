@@ -9,6 +9,9 @@ class ViewController extends PluginController {
         parent::before_filter($action, $args);
         Navigation::activateItem("/admin/config/delorean");
         $this->internal_limit = 30;
+        if (!$GLOBALS['perm']->have_perm("root")) {
+            throw new AccessDeniedException("Kein Zugriff");
+        }
 
         $deleting = Config::get()->DELOREAN_DELETE_MEMORY;
         if ($deleting) {
@@ -27,9 +30,6 @@ class ViewController extends PluginController {
     }
 
     public function all_action() {
-        if (!$GLOBALS['perm']->have_perm("root")) {
-            throw new AccessDeniedException("Kein Zugriff");
-        }
         if (Request::isPost() && Request::submitted("undo_all")) {
             $versions = SormVersion::findMany(array_reverse(Request::getArray("v")), "ORDER BY version_id DESC");
             foreach ($versions as $version) {
@@ -59,9 +59,6 @@ class ViewController extends PluginController {
     }
 
     public function more_action() {
-        if (!$GLOBALS['perm']->have_perm("root")) {
-            throw new AccessDeniedException("Kein Zugriff");
-        }
         $this->versions = $this->getVersions(array(
             'offset' => Request::int("offset", 0),
             'limit' => Request::int("limit", $this->internal_limit) + 1,

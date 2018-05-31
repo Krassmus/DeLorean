@@ -55,6 +55,7 @@ class SormVersion extends SimpleORMap {
         $config['db_table'] = 'sorm_versions';
         $config['serialized_fields']['json_data'] = 'JSONArrayObject';
         $config['registered_callbacks']['before_store'][]     = 'cbSaveFile';
+        $config['registered_callbacks']['before_delete'][]    = 'cbDeleteFile';
         parent::configure($config);
     }
 
@@ -80,14 +81,14 @@ class SormVersion extends SimpleORMap {
         return true;
     }
 
-    public function delete() {
-        parent::delete();
+    public function cbDeleteFile() {
         if ($this['original_file_path'] && file_exists($this->getFilePath())) {
-            $another_version = SormVersion::countBySQL("file_id = ?", array($this['file_id']));
+            $another_version = SormVersion::countBySQL("version_id != ? AND file_id = ?", array($this->getId(), $this['file_id']));
             if (!$another_version) {
                 @unlink($this->getFilePath());
             }
         }
+        return true;
     }
 
     public function getFilePath() {
@@ -125,6 +126,9 @@ class SormVersion extends SimpleORMap {
             if (!$current) { //es gibt aber keine aktuelle Version mehr. Also bauen wir uns eine.
                 $class = $this['sorm_class'];
                 $current = new $class();
+                if ($this['sorm_class'] == "File") {
+                    var_dump("create new File");
+                }
             }
             $current->setData($this['json_data']->getArrayCopy());
             $success = $current->store();

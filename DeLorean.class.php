@@ -11,6 +11,38 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             $navigation = new Navigation(_("DeLorean-Wiederherstellungsmaschine"), PluginEngine::getURL($this, array(), "view/all"));
             Navigation::addItem("/admin/config/delorean", $navigation);
         }
+        if (Context::get()->id
+                && $GLOBALS['perm']->have_studip_perm(Config::get()->DELOREAN_RECOVERY_PERM, Context::get()->id)
+                && Navigation::hasItem("/course/files")
+                && (stripos($_SERVER['REQUEST_URI'], "dispatch.php/course/files") !== false)) {
+            NotificationCenter::addObserver($this, "addToFilesSidebar", "SidebarWillRender");
+        }
+
+    }
+
+    public function addToFilesSidebar()
+    {
+        $statement = DBManager::get()->prepare("
+            SELECT id FROM folders WHERE range_id = ?
+        ");
+        $statement->execute(array(Context::get()->id));
+        $folder_ids = $statement->fetchAll(PDO::FETCH_COLUMN, 0);
+        $versions = SormVersion::findBySQL("(`sorm_class` = 'Folder' OR `sorm_class` = 'FileRef') AND `delete` = '1' AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)");
+        $versions = array_filter($versions, function ($version) use ($folder_ids) {
+            if ($version['sorm_class'] === "Folder") {
+                return ($version['json_data']['range_id'] === Context::get()->id) && (in_array($version['json_data']['parent_id'], $folder_ids));
+            } else {
+                return (in_array($version['json_data']['folder_id'], $folder_ids));
+            }
+        });
+        if (count($versions)) {
+            $actions = Sidebar::Get()->getWidget("actions");
+            $actions->addLink(
+                _("Objekte wiederherstellen"),
+                PluginEngine::getURL($this, array(), "recover/overview"),
+                Icon::create("archive2", "clickable")
+            );
+        }
     }
 
     public function versioning($event, $sorm) {
