@@ -20,12 +20,19 @@ class RecoverController extends PluginController {
         ");
         $statement->execute(array(Context::get()->id));
         $folder_ids = $statement->fetchAll(PDO::FETCH_COLUMN, 0);
-        $this->folder_versions = SormVersion::findBySQL("`sorm_class` = 'Folder' AND `delete` = '1' AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)");
+        $this->folder_versions = SormVersion::findBySQL("
+            `sorm_class` = 'Folder' 
+            AND `delete` = '1' 
+            AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)");
         $this->folder_versions = array_filter($this->folder_versions, function ($version) use ($folder_ids) {
             return ($version['json_data']['range_id'] === Context::get()->id) && (in_array($version['json_data']['parent_id'], $folder_ids));
         }); //only folders that are deleted and could be recovered
 
-        $this->file_versions = SormVersion::findBySQL("`sorm_class` = 'FileRef' AND `delete` = '1' AND mkdate = (SELECT mkdate FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY s2.version_id DESC LIMIT 1)");
+        $this->file_versions = SormVersion::findBySQL("
+            `sorm_class` = 'FileRef' 
+            AND `delete` = '1' 
+            AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY s2.version_id DESC LIMIT 1)
+        ");
         $this->file_versions = array_filter($this->file_versions, function ($version) use ($folder_ids) {
             return (in_array($version['json_data']['folder_id'], $folder_ids));
         }); //only folders that are deleted and could be recovered

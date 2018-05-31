@@ -53,7 +53,7 @@
                         </td>
                         <td>
                             <a href="<?= PluginEngine::getLink($plugin, array(), "recover/download_file/".$version->getId()) ?>">
-                                <?= Icon::create("file", "clickable")->asImg(26) ?>
+                                <?= Icon::create(FileManager::getIconNameForMimeType(get_mime_type($version['json_data']['name'])), Icon::ROLE_CLICKABLE)->asImg(24) ?>
                             </a>
                         </td>
                         <td>
