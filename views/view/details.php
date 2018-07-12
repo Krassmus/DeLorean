@@ -9,7 +9,7 @@
 <div class="sorm_version_info">
     <table class="default">
         <tbody>
-        <? foreach ($version['json_data'] as $key => $value) : ?>
+        <? foreach ($version['json_data']->getArrayCopy() as $key => $value) : ?>
             <? if ($key !== "id") : ?>
             <tr class="<?= isset($previous['json_data'][$key]) && $previous['json_data'][$key] === $value ? "unchanged" : "changed" ?>">
                 <td><?= htmlReady($key) ?></td>
@@ -57,8 +57,12 @@
     </table>
     <? if ($version['original_file_path'] && !$version['create']) : ?>
         <div class="<?= $previous['file_id'] === $version['file_id'] ? "unchanged" : "changed" ?>" style="text-align: center;">
-            <? $mimetype = explode("/", mime_content_type($version->getFilePath())) ?>
-            <? if ($mimetype[0] === "image") : ?>
+            <?
+            $mime_type = function_exists("get_mime_type")
+                ? mime_content_type($version->getFilePath())
+                : $version['json_data']['mime_type'];
+            $mime_type = explode("/", $mime_type) ?>
+            <? if ($mime_type[0] === "image") : ?>
                 <img src="<?= PluginEngine::getLink($plugin, array(), "view/file/".$version->getId()) ?>" style="max-width: 100%;">
             <? else : ?>
                 <a href="<?= PluginEngine::getLink($plugin, array(), "view/file/".$version->getId()) ?>">

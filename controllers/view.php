@@ -12,21 +12,7 @@ class ViewController extends PluginController {
         if (!$GLOBALS['perm']->have_perm("root")) {
             throw new AccessDeniedException("Kein Zugriff");
         }
-
-        $deleting = Config::get()->DELOREAN_DELETE_MEMORY;
-        if ($deleting) {
-            SormVersion::deleteBySQL("mkdate < UNIX_TIMESTAMP() - ?", array($deleting * 86400));
-        }
-        $deleting = Config::get()->DELOREAN_MAKE_USERIDS_ANONYMOUS;
-        if ($deleting) {
-            $statement = DBManager::get()->prepare("
-                UPDATE sorm_versions
-                SET user_id = null
-                WHERE user_id IS NOT NULL
-                    AND mkdate < UNIX_TIMESTAMP() - ?
-            ");
-            $statement->execute(array($deleting));
-        }
+        SormVersion::cleanDBUp();
     }
 
     public function all_action() {
@@ -54,6 +40,7 @@ class ViewController extends PluginController {
         }
 
         $this->size = Sormversion::getAllocatedSpace();
+        $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY version_id ASC LIMIT 1");
 
         $this->render_template("view/versions.php", $this->layout);
     }
@@ -165,7 +152,10 @@ class ViewController extends PluginController {
             throw new AccessDeniedException("Kein Zugriff");
         }
         if ($this->version['original_file_path']) {
-            header("Content-Type: ".mime_content_type($this->version->getFilePath()));
+            $mime_type = function_exists("get_mime_type")
+                ? mime_content_type($this->version->getFilePath())
+                : $this->version['json_data']['mime_type'];
+            header("Content-Type: ".$mime_type);
             echo file_get_contents($this->version->getFilePath());
             die();
         }

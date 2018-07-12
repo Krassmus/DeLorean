@@ -53,7 +53,12 @@
                         </td>
                         <td>
                             <a href="<?= PluginEngine::getLink($plugin, array(), "recover/download_file/".$version->getId()) ?>">
-                                <?= Icon::create(FileManager::getIconNameForMimeType(get_mime_type($version['json_data']['name'])), Icon::ROLE_CLICKABLE)->asImg(24) ?>
+                                <?
+                                $mime_type = function_exists("get_mime_type")
+                                    ? get_mime_type($version['json_data']['name'])
+                                    : $version['json_data']['mime_type'];
+                                ?>
+                                <?= Icon::create(FileManager::getIconNameForMimeType($mime_type), Icon::ROLE_CLICKABLE)->asImg(24) ?>
                             </a>
                         </td>
                         <td>

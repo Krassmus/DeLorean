@@ -6,10 +6,38 @@ class SormVersion extends SimpleORMap {
     static protected $forbidden = array("SormVersion", "PersonalNotifications",
         "Message", "MessageUser", "UserConfigEntry", "MailQueueEntry", "LogEvent");
 
+    static public function cleanDBUp()
+    {
+        $deleting = Config::get()->DELOREAN_DELETE_MEMORY;
+        if ($deleting) {
+            SormVersion::deleteBySQL("mkdate < UNIX_TIMESTAMP() - ?", array($deleting * 86400));
+        }
+        $deleting = Config::get()->DELOREAN_MAKE_USERIDS_ANONYMOUS;
+        if ($deleting) {
+            $statement = DBManager::get()->prepare("
+                UPDATE sorm_versions
+                SET user_id = null
+                WHERE user_id IS NOT NULL
+                    AND mkdate < UNIX_TIMESTAMP() - ?
+            ");
+            $statement->execute(array($deleting));
+        }
+        while (Config::get()->DELOREAN_MAX_SIZE > 0 && self::getAllocatedSpace() > Config::get()->DELOREAN_MAX_SIZE) {
+            $last = self::findOneBySQL("1 = 1 ORDER BY version_id ASC LIMIT 1");
+            $last->delete();
+        }
+    }
+
     static public function getFileDataPath() {
         $folder = $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
         if (!file_exists($folder)) {
-            mkdir($folder);
+            $success = @mkdir($folder);
+            if (!$success && $GLOBALS['perm']->have_perm("root")) {
+                PageLayout::postError(_("Konnte Verzeichnis data/delorean_files nicht erstellen."));
+            }
+            if (!$success) {
+                $folder = null;
+            }
         }
         return $folder;
     }
@@ -42,9 +70,11 @@ class SormVersion extends SimpleORMap {
 
         $filesize = 0;
         $folder = self::getFileDataPath();
-        $files = array_diff(scandir($folder), array('.', '..'));
-        foreach ($files as $file) {
-            $filesize += filesize($folder . "/" . $file);
+        if ($folder) {
+            $files = array_diff(scandir($folder), array('.', '..'));
+            foreach ($files as $file) {
+                $filesize += filesize($folder . "/" . $file);
+            }
         }
 
         return $data['DATA_LENGTH'] + $data['INDEX_LENGTH'] + $filesize;
@@ -56,6 +86,7 @@ class SormVersion extends SimpleORMap {
         $config['serialized_fields']['json_data'] = 'JSONArrayObject';
         $config['registered_callbacks']['before_store'][]     = 'cbSaveFile';
         $config['registered_callbacks']['before_delete'][]    = 'cbDeleteFile';
+        $config['registered_callbacks']['after_store'][]      = 'cbCleanUp';
         parent::configure($config);
     }
 
@@ -75,25 +106,41 @@ class SormVersion extends SimpleORMap {
                 $this->content['file_id'] = $previous['file_id'];
             } else {
                 $this->content['file_id'] = md5(uniqid());
-                @copy($this['original_file_path'], $this->getFilePath());
+                $filePath = $this->getFilePath();
+                if ($filePath) {
+                    @copy($this['original_file_path'], $filePath);
+                }
             }
         }
         return true;
     }
 
     public function cbDeleteFile() {
-        if ($this['original_file_path'] && file_exists($this->getFilePath())) {
+        $filePath = $this->getFilePath();
+        if ($this['original_file_path'] && file_exists($filePath)) {
             $another_version = SormVersion::countBySQL("version_id != ? AND file_id = ?", array($this->getId(), $this['file_id']));
             if (!$another_version) {
-                @unlink($this->getFilePath());
+                if ($filePath) {
+                    @unlink($filePath);
+                }
             }
         }
         return true;
     }
 
+    public function cbCleanUp() {
+        while (Config::get()->DELOREAN_MAX_SIZE > 0 && self::getAllocatedSpace() > Config::get()->DELOREAN_MAX_SIZE) {
+            $last = self::findOneBySQL("1 = 1 ORDER BY version_id ASC LIMIT 1");
+            if ($last) {
+                $last->delete();
+            }
+        }
+    }
+
     public function getFilePath() {
-        if (!file_exists(self::getFileDataPath())) {
-            mkdir(self::getFileDataPath());
+        $folder = self::getFileDataPath();
+        if (!$folder) {
+            return false;
         }
         if (!$this['file_id']) {
             $this['file_id'] = md5(uniqid());
@@ -133,10 +180,6 @@ class SormVersion extends SimpleORMap {
             $current->setData($this['json_data']->getArrayCopy());
             $success = $current->store();
             if ($success && $this['original_file_path']) {
-                var_dump($this['original_file_path']);
-                var_dump($this->getFilePath());
-                var_dump(file_exists($this['original_file_path']));
-                var_dump(file_exists($this->getFilePath()));
                 @copy($this->getFilePath(), $this['original_file_path']);
             }
             return "changed";
