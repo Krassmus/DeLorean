@@ -85,7 +85,7 @@ class RecoverController extends PluginController {
         if (!$file) {
             $file_version = SormVersion::findOneBySQL("`sorm_class` = 'File' AND `item_id` = ? AND `delete` = '1'  AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1) ", array($file_id));
             if ($file_version) {
-                $mime_type = function_exists("get_mime_type")
+                $mime_type = function_exists("mime_content_type")
                     ? mime_content_type($file_version->getFilePath())
                     : $file_version['json_data']['mime_type'];
                 header("Content-Type: ".$mime_type);
@@ -93,7 +93,7 @@ class RecoverController extends PluginController {
                 die();
             }
         } else {
-            $mime_type = function_exists("get_mime_type")
+            $mime_type = function_exists("mime_content_type")
                 ? mime_content_type($file->getPath())
                 : $this->version['json_data']['mime_type'];
             header("Content-Type: ".$mime_type);

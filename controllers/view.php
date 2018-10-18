@@ -152,7 +152,7 @@ class ViewController extends PluginController {
             throw new AccessDeniedException("Kein Zugriff");
         }
         if ($this->version['original_file_path']) {
-            $mime_type = function_exists("get_mime_type")
+            $mime_type = function_exists("mime_content_type")
                 ? mime_content_type($this->version->getFilePath())
                 : $this->version['json_data']['mime_type'];
             header("Content-Type: ".$mime_type);
@@ -184,7 +184,7 @@ class ViewController extends PluginController {
             $parameter['since'] = $params['since'];
         }
         if ($params['searchfor']) {
-            $constraints[] = "json_data LIKE :searchfor";
+            $constraints[] = "(json_data LIKE :searchfor OR sorm_class LIKE :searchfor)";
             $parameter['searchfor'] = '%'.$params['searchfor'].'%';
         }
         if ($params['type']) {

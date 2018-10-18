@@ -58,7 +58,7 @@
     <? if ($version['original_file_path'] && !$version['create']) : ?>
         <div class="<?= $previous['file_id'] === $version['file_id'] ? "unchanged" : "changed" ?>" style="text-align: center;">
             <?
-            $mime_type = function_exists("get_mime_type")
+            $mime_type = function_exists("mime_content_type")
                 ? mime_content_type($version->getFilePath())
                 : $version['json_data']['mime_type'];
             $mime_type = explode("/", $mime_type) ?>

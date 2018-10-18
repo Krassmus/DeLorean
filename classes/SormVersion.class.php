@@ -151,9 +151,14 @@ class SormVersion extends SimpleORMap {
     public function invoke() {
         if ($this->invokation === null) {
             $class = $this['sorm_class'];
-            $this->invokation = new $class($this['item_id']);
+            $id = $this['item_id'];
+            if (strpos($id, "_") !== false) {
+                $id = explode("_", $id);
+            }
+
+            $this->invokation = new $class($id);
             if ($this->invokation->isNew()) {
-                $this->invokation->setId($this['item_id']);
+                $this->invokation->setId($id);
             }
         }
         return $this->invokation;
@@ -178,6 +183,7 @@ class SormVersion extends SimpleORMap {
                 }
             }
             $current->setData($this['json_data']->getArrayCopy());
+
             $success = $current->store();
             if ($success && $this['original_file_path']) {
                 @copy($this->getFilePath(), $this['original_file_path']);
