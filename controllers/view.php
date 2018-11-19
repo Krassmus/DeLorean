@@ -40,7 +40,7 @@ class ViewController extends PluginController {
         }
 
         $this->size = Sormversion::getAllocatedSpace();
-        $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY version_id ASC LIMIT 1");
+        $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY mkdate ASC LIMIT 1");
 
         $this->render_template("view/versions.php", $this->layout);
     }

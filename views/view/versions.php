@@ -103,7 +103,7 @@ Sidebar::Get()->addWidget($search);
 Helpbar::Get()->addPlainText(
         _("Speicherplatz"),
         sprintf(
-            _("Die gespeicherten Datenbankeinträge plus Dateien nehmen %s MB ein."),
-            round($size / (1024 * 1024), 2)
+            _("Die gespeicherten Datenbankeinträge plus Dateien nehmen %s GB ein."),
+            round($size / (1024 * 1024 * 1024), 2)
         )." ".($lastversion ? sprintf(_("Und die früheste noch existente Version stammt von %s Uhr."), date("j.n.Y G.i", $lastversion['mkdate'])) : "")
 );

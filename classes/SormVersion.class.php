@@ -29,7 +29,7 @@ class SormVersion extends SimpleORMap {
     }
 
     static public function getFileDataPath() {
-        $folder = $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
+        $folder = trim(Config::get()->DELOREAN_DATA_PATH) ?: $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
         if (!file_exists($folder)) {
             $success = @mkdir($folder);
             if (!$success && $GLOBALS['perm']->have_perm("root")) {
@@ -73,7 +73,9 @@ class SormVersion extends SimpleORMap {
         if ($folder) {
             $files = array_diff(scandir($folder), array('.', '..'));
             foreach ($files as $file) {
-                $filesize += filesize($folder . "/" . $file);
+                if (file_exists($folder . "/" . $file)) {
+                    $filesize += filesize($folder . "/" . $file);
+                }
             }
         }
 

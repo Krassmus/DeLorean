@@ -31,6 +31,7 @@ class InitPlugin extends Migration {
     public function down() {
         DBManager::get()->exec("DROP TABLE `sorm_versions` ");
         $folder = $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
+        $folder = trim(Config::get()->DELOREAN_DATA_PATH) ?: $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
 
         $files = array_diff(scandir($folder), array('.', '..'));
         foreach ($files as $file) {
@@ -38,6 +39,7 @@ class InitPlugin extends Migration {
         }
         rmdir($folder);
         Config::get()->delete("DELOREAN_MAKE_USERIDS_ANONYMOUS");
+        Config::get()->delete("DELOREAN_DATA_PATH");
     }
 
 }
