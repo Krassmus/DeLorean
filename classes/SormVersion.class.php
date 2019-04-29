@@ -24,7 +24,24 @@ class SormVersion extends SimpleORMap {
         }
         while (Config::get()->DELOREAN_MAX_SIZE > 0 && self::getAllocatedSpace() > Config::get()->DELOREAN_MAX_SIZE) {
             $last = self::findOneBySQL("1 = 1 ORDER BY version_id ASC LIMIT 1");
-            $last->delete();
+            if ($last) {
+                $last->delete();
+            } else {
+                break;
+            }
+        }
+        //verwaiste Dateien löschen:
+        $folder = self::getFileDataPath();
+        if ($folder) {
+            $files = array_diff(scandir($folder), array('.', '..'));
+            foreach ($files as $file) {
+                if (file_exists($folder . "/" . $file)) {
+                    $version = self::findOneBySQL("file_id = ? LIMIT 1", array($file));
+                    if (!$version) {
+                        @unlink($folder . "/" . $file);
+                    }
+                }
+            }
         }
     }
 
