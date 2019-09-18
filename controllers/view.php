@@ -12,10 +12,10 @@ class ViewController extends PluginController {
         if (!$GLOBALS['perm']->have_perm("root")) {
             throw new AccessDeniedException("Kein Zugriff");
         }
-        SormVersion::cleanDBUp();
     }
 
     public function all_action() {
+        SormVersion::cleanDBUp();
         if (Request::isPost() && Request::submitted("undo_all")) {
             $versions = SormVersion::findMany(array_reverse(Request::getArray("v")), "ORDER BY version_id DESC");
             foreach ($versions as $version) {
