@@ -13,7 +13,7 @@
            <?= $value ? "onChange=\"if (!this.value) { jQuery(this).closest('form').submit(); }\"" : "" ?>
         <? if ($placeholder) printf('placeholder="%s"', htmlReady($label)); ?>>
 
-    <?= \Studip\Button::create(_("Ab Datum oder früher anzeigen")) ?>
+    <?= \Studip\Button::create(_("Datum oder früher anzeigen")) ?>
 
     <script>
         jQuery(function () {
