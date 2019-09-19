@@ -1,10 +1,12 @@
 <?php
 
-require_once __DIR__."/classes/SormVersion.class.php";
+require_once __DIR__."/lib/SormVersion.php";
+require_once __DIR__."/lib/DatetimeWidget.php";
 
 class DeLorean extends StudIPPlugin implements SystemPlugin {
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
         NotificationCenter::addObserver($this, "versioning", "");
         if ($GLOBALS['perm']->have_perm("root")) {
@@ -82,7 +84,6 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
                 }
             }
             $version->store();
-            //var_dump($version); die();
         }
         return true;
     }

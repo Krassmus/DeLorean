@@ -25,8 +25,15 @@ class ViewController extends PluginController {
             $this->redirect("view/all");
             return;
         }
+
+        $offset = Request::int("offset", 0);
+        if (Request::get("timestamp")) {
+            $timestamp = strtotime(Request::get("timestamp"));
+            $offset = SormVersion::countBySQL("mkdate > ?", array($timestamp));
+        }
+
         $params = array(
-            'offset' => Request::int("offset", 0),
+            'offset' => $offset,
             'limit' => Request::int("limit", $this->internal_limit) + 1
         );
         if (Request::get("searchfor")) {
@@ -52,7 +59,8 @@ class ViewController extends PluginController {
             'item_id' => Request::option("item_id"),
             'searchfor' => Request::get("searchfor"),
             'mkdate' => Request::int("mkdate"),
-            'type' => Request::get("type")
+            'type' => Request::get("type"),
+            'user_id' => Request::get("user_id")
         ));
         if (count($this->versions) > $this->internal_limit) {
             array_pop($this->versions);
@@ -109,6 +117,7 @@ class ViewController extends PluginController {
             array_pop($this->versions);
             $this->more = true;
         }
+        $this->caption = _("Gefiltert nach Zeit");
         $this->size = Sormversion::getAllocatedSpace();
         $this->render_template("view/versions.php", $this->layout);
     }
@@ -120,6 +129,23 @@ class ViewController extends PluginController {
             'type' => $class
         ));
         $this->type = $class;
+        if (count($this->versions) > $this->internal_limit) {
+            array_pop($this->versions);
+            $this->more = true;
+        }
+        $this->size = Sormversion::getAllocatedSpace();
+        $this->caption = _("Gefiltert nach Typ");
+        $this->render_template("view/versions.php", $this->layout);
+    }
+
+    public function by_action($user_id) {
+        $this->versions = $this->getVersions(array(
+            'offset' => Request::int("offset", 0),
+            'limit' => Request::int("limit", $this->internal_limit) + 1,
+            'user_id' => $user_id
+        ));
+        $this->caption = _("Gefiltert nach Veränderer");
+        $this->user_id = $user_id;
         if (count($this->versions) > $this->internal_limit) {
             array_pop($this->versions);
             $this->more = true;
@@ -190,6 +216,10 @@ class ViewController extends PluginController {
         if ($params['type']) {
             $constraints[] = "sorm_class = :sorm_class";
             $parameter['sorm_class'] = $params['type'];
+        }
+        if ($params['user_id']) {
+            $constraints[] = "user_id = :user_id";
+            $parameter['user_id'] = $params['user_id'];
         }
 
 

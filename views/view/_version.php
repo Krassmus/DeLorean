@@ -12,7 +12,7 @@
     <? if (!Config::get()->DELOREAN_ANONYMOUS_USERS) : ?>
     <td>
         <? if ($version['user_id']) : ?>
-            <a href="<?= URLHelper::getLink("dispatch.php/profile", array('username' => get_username($version['user_id']))) ?>">
+            <a href="<?= PluginEngine::getLink($plugin, array(), "view/by/".$version['user_id']) ?>">
                 <?= Avatar::getAvatar($version['user_id'])->getImageTag(Avatar::SMALL) ?>
                 <?= htmlReady(get_fullname($version['user_id'])) ?>
             </a>

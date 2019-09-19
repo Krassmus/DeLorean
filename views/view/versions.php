@@ -15,6 +15,10 @@
     <? if ($type) : ?>
         <input type="hidden" id="type" value="<?= htmlReady($type) ?>">
     <? endif ?>
+    <? if ($user_id) : ?>
+        <input type="hidden" id="user_id" value="<?= htmlReady($user_id) ?>">
+    <? endif ?>
+
 
     <div style="float: right;">
         <?= \Studip\Button::create(_("Ausgewählte rückgängig machen"), "undo_all") ?>
@@ -22,6 +26,11 @@
     <div style="clear: both;"></div>
 
     <table class="default" id="sormversions">
+        <? if ($caption) : ?>
+        <caption>
+            <?= htmlReady($caption) ?>
+        </caption>
+        <? endif ?>
         <thead>
             <tr>
                 <th></th>
@@ -75,7 +84,8 @@
                     'item_id': jQuery("#item_id").val(),
                     'searchfor': jQuery("#searchfor").val(),
                     'mkdate': jQuery("#mkdate").val(),
-                    'type': jQuery("#type").val()
+                    'type': jQuery("#type").val(),
+                    'user_id': jQuery("#user_id").val()
                 },
                 dataType: "json",
                 success: function (response) {
@@ -94,11 +104,24 @@
     }, 30));
 </script>
 
+
 <?
 
 $search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/all"));
 $search->addNeedle(_("ID, Eigenschaft, Zeitstempel"), "searchfor", true);
 Sidebar::Get()->addWidget($search);
+
+
+$datepicker = new DatetimeWidget(
+    PluginEngine::getURL($plugin, array(), "view/all"),
+    "timestamp",
+    _("ab ...")
+);
+if (Request::get("timestamp")) {
+    $datepicker->setValue(Request::get("timestamp"));
+}
+Sidebar::Get()->addWidget($datepicker);
+
 
 Helpbar::Get()->addPlainText(
         _("Speicherplatz"),
