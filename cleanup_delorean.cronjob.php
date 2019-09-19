@@ -36,5 +36,18 @@ class CleanupDelorean extends CronJob
     public function execute($last_result, $parameters = array())
     {
         SormVersion::cleanDBUp();
+        //verwaiste Dateien löschen:
+        $folder = self::getFileDataPath();
+        if ($folder) {
+            $files = array_diff(scandir($folder), array('.', '..'));
+            foreach ($files as $file) {
+                if (file_exists($folder . "/" . $file)) {
+                    $version = self::findOneBySQL("file_id = ? LIMIT 1", array($file));
+                    if (!$version) {
+                        @unlink($folder . "/" . $file);
+                    }
+                }
+            }
+        }
     }
 }
