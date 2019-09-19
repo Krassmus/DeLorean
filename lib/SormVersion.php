@@ -22,7 +22,11 @@ class SormVersion extends SimpleORMap {
             ");
             $statement->execute(array($deleting));
         }
+        self::removeDatebaseEntries();
+    }
 
+    protected static function removeDatebaseEntries()
+    {
         if (Config::get()->DELOREAN_MAX_SIZE > 0) {
             $old_allocated_space = self::getAllocatedSpace();
             $freeed_space = 0;
@@ -144,22 +148,7 @@ class SormVersion extends SimpleORMap {
     }
 
     public function cbCleanUp() {
-        if (Config::get()->DELOREAN_MAX_SIZE > 0) {
-            $old_allocated_space = self::getAllocatedSpace();
-            $freeed_space = 0;
-            while ($old_allocated_space - $freeed_space > Config::get()->DELOREAN_MAX_SIZE) {
-                $last = self::findOneBySQL("1 = 1 ORDER BY version_id ASC LIMIT 1");
-                if ($last) {
-                    $freeed_space += strlen($last['json_data']) + 20 + 32 + 128 + 97 + 100 + 100 + 4 + 4 + 11;
-                    if (file_exists($last->getFilePath())) {
-                        $freeed_space += filesize($last->getFilePath());
-                    }
-                    $last->delete();
-                } else {
-                    break;
-                }
-            }
-        }
+        self::removeDatebaseEntries();
     }
 
     public function getFilePath() {

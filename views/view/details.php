@@ -10,7 +10,6 @@
     <table class="default">
         <tbody>
         <? foreach ($version['json_data']->getArrayCopy() as $key => $value) : ?>
-            <? if ($key !== "id") : ?>
             <tr class="<?= isset($previous['json_data'][$key]) && $previous['json_data'][$key] === $value ? "unchanged" : "changed" ?>">
                 <td><?= htmlReady($key) ?></td>
                 <td>
@@ -51,7 +50,6 @@
                     </div>
                 </td>
             </tr>
-            <? endif ?>
             <? endforeach ?>
         </tbody>
     </table>
