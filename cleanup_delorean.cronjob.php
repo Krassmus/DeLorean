@@ -19,7 +19,7 @@ class CleanupDelorean extends CronJob
     }
 
     public function setUp() {
-        require_once __DIR__."/classes/SormVersion.class.php";
+        require_once __DIR__."/lib/SormVersion.php";
     }
 
     /**
@@ -37,12 +37,12 @@ class CleanupDelorean extends CronJob
     {
         SormVersion::cleanDBUp();
         //verwaiste Dateien löschen:
-        $folder = self::getFileDataPath();
+        $folder = SormVersion::getFileDataPath();
         if ($folder) {
             $files = array_diff(scandir($folder), array('.', '..'));
             foreach ($files as $file) {
                 if (file_exists($folder . "/" . $file)) {
-                    $version = self::findOneBySQL("file_id = ? LIMIT 1", array($file));
+                    $version = SormVersion::findOneBySQL("file_id = ? LIMIT 1", array($file));
                     if (!$version) {
                         @unlink($folder . "/" . $file);
                     }
