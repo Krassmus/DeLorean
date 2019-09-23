@@ -138,7 +138,12 @@ class ViewController extends PluginController {
         $this->render_template("view/versions.php", $this->layout);
     }
 
-    public function by_action($user_id) {
+    public function by_action($user_id = null) {
+        $user_id || $user_id = Request::option("user_id");
+        if (Request::get("reset-search")) {
+            $this->redirect("view/all");
+            return;
+        }
         $this->versions = $this->getVersions(array(
             'offset' => Request::int("offset", 0),
             'limit' => Request::int("limit", $this->internal_limit) + 1,

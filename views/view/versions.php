@@ -111,6 +111,18 @@ $search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/all"));
 $search->addNeedle(_("ID, Eigenschaft, Zeitstempel"), "searchfor", true);
 Sidebar::Get()->addWidget($search);
 
+$search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/by"));
+$search->setTitle(_("Personen-Filter"));
+$search->addNeedle(
+        _("Person"),
+        "user_id",
+        true,
+        new StandardSearch("user_id"),
+        "function () { jQuery('input[name=user_id]').closest('form').submit(); }",
+        $user_id
+);
+Sidebar::Get()->addWidget($search);
+
 
 $datepicker = new DatetimeWidget(
     PluginEngine::getURL($plugin, array(), "view/all"),
