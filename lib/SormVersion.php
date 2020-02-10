@@ -63,7 +63,9 @@ class SormVersion extends SimpleORMap {
         if (!is_a($class, "SimpleORMap")) {
             return false;
         }
-        foreach(self::$forbidden as $forbidden_class) {
+        $forbidden = (array) preg_split("/\s+/", Config::get()->DELOREAN_DISABLED_CLASSES, null, PREG_SPLIT_NO_EMPTY);
+        array_unshift( $forbidden, "SormVersion");
+        foreach ($forbidden as $forbidden_class) {
             if (is_a($class, $forbidden_class)) {
                 return false;
             }
