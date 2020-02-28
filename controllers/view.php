@@ -57,6 +57,7 @@ class ViewController extends PluginController {
             'offset' => Request::int("offset", 0),
             'limit' => Request::int("limit", $this->internal_limit) + 1,
             'item_id' => Request::option("item_id"),
+            'request_id' => Request::option("request_id"),
             'searchfor' => Request::get("searchfor"),
             'mkdate' => Request::int("mkdate"),
             'type' => Request::get("type"),
@@ -102,6 +103,21 @@ class ViewController extends PluginController {
             $this->more = true;
         }
         $this->item_id = $item_id;
+        $this->size = Sormversion::getAllocatedSpace();
+        $this->render_template("view/versions.php", $this->layout);
+    }
+
+    public function request_action($request_id) {
+        $this->versions = $this->getVersions(array(
+            'offset' => Request::int("offset", 0),
+            'limit' => Request::int("limit", $this->internal_limit) + 1,
+            'request_id' => $request_id
+        ));
+        if (count($this->versions) > $this->internal_limit) {
+            array_pop($this->versions);
+            $this->more = true;
+        }
+        $this->request_id = $request_id;
         $this->size = Sormversion::getAllocatedSpace();
         $this->render_template("view/versions.php", $this->layout);
     }
@@ -205,6 +221,10 @@ class ViewController extends PluginController {
         if ($params['item_id']) {
             $constraints[] = "item_id = :item_id";
             $parameter['item_id'] = $params['item_id'];
+        }
+        if ($params['request_id']) {
+            $constraints[] = "request_id = :request_id";
+            $parameter['request_id'] = $params['request_id'];
         }
         if ($params['mkdate']) {
             $constraints[] = "mkdate = :mkdate";

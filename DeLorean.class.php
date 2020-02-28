@@ -8,6 +8,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
     public function __construct()
     {
         parent::__construct();
+        $GLOBALS['DELOREAN_UNIQUE_REQUEST_ID'] = md5(uniqid($GLOBALS['user']->id, true));
         NotificationCenter::addObserver($this, "versioning", "");
         if ($GLOBALS['perm']->have_perm("root")) {
             $navigation = new Navigation(_("DeLorean-Wiederherstellungsmaschine"), PluginEngine::getURL($this, array(), "view/all"));
@@ -69,6 +70,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             $version['sorm_class'] = get_class($sorm);
             $version['item_id'] = $sorm->id ?: $sorm->getId();
             $version['json_data'] = $sorm->toRawArray();
+            $version['request_id'] = $GLOBALS['DELOREAN_UNIQUE_REQUEST_ID'];
             $version['delete'] = 0;
             $version['create'] = 0;
             if ($action === "delete") {

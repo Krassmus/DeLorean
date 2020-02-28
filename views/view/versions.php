@@ -6,6 +6,9 @@
     <? if ($item_id) : ?>
         <input type="hidden" id="item_id" value="<?= htmlReady($item_id) ?>">
     <? endif ?>
+    <? if ($request_id) : ?>
+        <input type="hidden" id="request_id" value="<?= htmlReady($request_id) ?>">
+    <? endif ?>
     <? if ($searchfor) : ?>
         <input type="hidden" id="searchfor" value="<?= htmlReady($searchfor) ?>">
     <? endif ?>
@@ -82,6 +85,7 @@
                     'limit': jQuery("#limit").val(),
                     'since': jQuery("#since").val(),
                     'item_id': jQuery("#item_id").val(),
+                    'request_id': jQuery("#request_id").val(),
                     'searchfor': jQuery("#searchfor").val(),
                     'mkdate': jQuery("#mkdate").val(),
                     'type': jQuery("#type").val(),
