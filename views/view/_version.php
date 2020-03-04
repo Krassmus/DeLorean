@@ -25,12 +25,16 @@
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/second/".$version['mkdate']) ?>">
             <?= date("d.m.Y H:i:s", $version['mkdate']) ?>
         </a>
-        <? if ($version['request_id'] && SormVersion::countBySql("request_id = ?", [$version['request_id']]) > 1) : ?>
-            <a href="<?= PluginEngine::getLink($plugin, array(), "view/request/".$version['request_id']) ?>"
-               title="<?= _("Alle Änderungen derselben Aktion ansehen.") ?>">
-                <?= Icon::create("campusnavi", "clickable")->asImg(16, ['class' => "text-bottom"]) ?>
-            </a>
+        <? if ($version['request_id']) : ?>
+            <? $counter = SormVersion::countBySql("request_id = ?", [$version['request_id']]) ?>
+            <? if ($counter > 1) : ?>
+                <a href="<?= PluginEngine::getLink($plugin, array(), "view/request/".$version['request_id']) ?>"
+                   title="<?= sprintf(_("Alle %s Änderungen derselben Aktion ansehen."), $counter) ?>">
+                    <?= Icon::create("campusnavi", "clickable")->asImg(16, ['class' => "text-bottom"]) ?>
+                </a>
+            <? endif ?>
         <? endif ?>
+
     </td>
     <td class="actions">
         <?= Icon::create($version['delete'] ? "trash" : ($version['create'] ? "star" : "edit"), "inactive")

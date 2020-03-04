@@ -21,16 +21,16 @@ class RecoverController extends PluginController {
         $statement->execute(array(Context::get()->id));
         $folder_ids = $statement->fetchAll(PDO::FETCH_COLUMN, 0);
         $this->folder_versions = SormVersion::findBySQL("
-            `sorm_class` = 'Folder' 
-            AND `delete` = '1' 
+            `sorm_class` = 'Folder'
+            AND `delete` = '1'
             AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)");
         $this->folder_versions = array_filter($this->folder_versions, function ($version) use ($folder_ids) {
             return ($version['json_data']['range_id'] === Context::get()->id) && (in_array($version['json_data']['parent_id'], $folder_ids));
         }); //only folders that are deleted and could be recovered
 
         $this->file_versions = SormVersion::findBySQL("
-            `sorm_class` = 'FileRef' 
-            AND `delete` = '1' 
+            `sorm_class` = 'FileRef'
+            AND `delete` = '1'
             AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY s2.version_id DESC LIMIT 1)
         ");
         $this->file_versions = array_filter($this->file_versions, function ($version) use ($folder_ids) {
@@ -49,6 +49,7 @@ class RecoverController extends PluginController {
         if (!$GLOBALS['perm']->have_studip_perm(Config::get()->DELOREAN_RECOVERY_PERM, Context::get()->id)) {
             throw new AccessDeniedException();
         }
+        set_time_limit(60*60*2);
         foreach (Request::getArray("v") as $version_id) {
             $version = new SormVersion($version_id);
             $this->filefolder_undo($version);
@@ -67,6 +68,7 @@ class RecoverController extends PluginController {
         if (!Request::isPost()) {
             throw new AccessDeniedException("Kein Zugriff");
         }
+        set_time_limit(60*60*2);
         $this->filefolder_undo($version);
 
         PageLayout::postMessage(MessageBox::success(_("Objekt wurde wiederhergestellt.")));

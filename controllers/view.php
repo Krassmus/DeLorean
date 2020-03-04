@@ -8,7 +8,7 @@ class ViewController extends PluginController {
     {
         parent::before_filter($action, $args);
         Navigation::activateItem("/admin/config/delorean");
-        $this->internal_limit = 30;
+        $this->internal_limit = 100;
         if (!$GLOBALS['perm']->have_perm("root")) {
             throw new AccessDeniedException("Kein Zugriff");
         }
@@ -215,7 +215,7 @@ class ViewController extends PluginController {
         $constraints = array();
         $parameter = array();
         if ($params['limit'] === null) {
-            $params['limit'] = 30;
+            $params['limit'] = $this->internal_limit;
         }
 
         if ($params['item_id']) {
