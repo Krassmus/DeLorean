@@ -74,7 +74,7 @@
 <script>
     //Infinity-scroll:
     jQuery(window.document).bind('scroll', _.throttle(function (event) {
-        if ((jQuery(window).scrollTop() + jQuery(window).height() > jQuery(window.document).height() - 500)
+        if ((jQuery(window).scrollTop() + jQuery(window).height() > jQuery(window.document).height() - 1200)
             && (jQuery("#sormversions .more").length > 0)) {
             //nachladen
             jQuery("#sormversions .more").removeClass("more").addClass("loading");
@@ -137,12 +137,3 @@ if (Request::get("timestamp")) {
     $datepicker->setValue(Request::get("timestamp"));
 }
 Sidebar::Get()->addWidget($datepicker);
-
-
-Helpbar::Get()->addPlainText(
-        _("Speicherplatz"),
-        sprintf(
-            _("Die gespeicherten Datenbankeinträge plus Dateien nehmen %s GB ein."),
-            round($size / (1024 * 1024 * 1024), 2)
-        )." ".($lastversion ? sprintf(_("Und die früheste noch existente Version stammt von %s Uhr."), date("j.n.Y G.i", $lastversion['mkdate'])) : "")
-);

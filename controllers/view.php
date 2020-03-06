@@ -46,9 +46,7 @@ class ViewController extends PluginController {
             $this->more = true;
         }
 
-        $this->size = Sormversion::getAllocatedSpace();
-        $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY mkdate ASC LIMIT 1");
-
+        $this->initHelpbar();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -104,6 +102,7 @@ class ViewController extends PluginController {
         }
         $this->item_id = $item_id;
         $this->size = Sormversion::getAllocatedSpace();
+        $this->initHelpbar();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -119,6 +118,7 @@ class ViewController extends PluginController {
         }
         $this->request_id = $request_id;
         $this->size = Sormversion::getAllocatedSpace();
+        $this->initHelpbar();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -134,7 +134,7 @@ class ViewController extends PluginController {
             $this->more = true;
         }
         $this->caption = _("Gefiltert nach Zeit");
-        $this->size = Sormversion::getAllocatedSpace();
+        $this->initHelpbar();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -149,8 +149,8 @@ class ViewController extends PluginController {
             array_pop($this->versions);
             $this->more = true;
         }
-        $this->size = Sormversion::getAllocatedSpace();
         $this->caption = _("Gefiltert nach Typ");
+        $this->initHelpbar();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -171,7 +171,7 @@ class ViewController extends PluginController {
             array_pop($this->versions);
             $this->more = true;
         }
-        $this->size = Sormversion::getAllocatedSpace();
+        $this->initHelpbar();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -254,6 +254,19 @@ class ViewController extends PluginController {
         return SormVersion::findBySQL(
             implode(" AND ", $constraints)." ORDER BY mkdate DESC, version_id DESC LIMIT ".(int) $params['offset'].", ".(int) $params['limit'],
             $parameter
+        );
+    }
+
+    protected function initHelpbar()
+    {
+        $this->size = Sormversion::getAllocatedSpace();
+        $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY mkdate ASC LIMIT 1");
+        Helpbar::Get()->addPlainText(
+            _("Speicherplatz"),
+            sprintf(
+                _("Die gespeicherten Datenbankeinträge plus Dateien nehmen %s GB ein."),
+                round($this->size / (1024 * 1024 * 1024), 2)
+            )." ".($this->lastversion ? sprintf(_("Und die früheste noch existente Version stammt von %s Uhr."), date("j.n.Y G.i", $this->lastversion['mkdate'])) : "")
         );
     }
 

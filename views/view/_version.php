@@ -12,8 +12,10 @@
     <? if (!Config::get()->DELOREAN_ANONYMOUS_USERS) : ?>
     <td>
         <? if ($version['user_id']) : ?>
-            <a href="<?= PluginEngine::getLink($plugin, array(), "view/by/".$version['user_id']) ?>">
+            <a href="<?= URLHelper::getLink( "dispatch.php/profile", ['username' => get_username($version['user_id'])]) ?>">
                 <?= Avatar::getAvatar($version['user_id'])->getImageTag(Avatar::SMALL) ?>
+            </a>
+            <a href="<?= PluginEngine::getLink($plugin, array(), "view/by/".$version['user_id']) ?>">
                 <?= htmlReady(get_fullname($version['user_id'])) ?>
             </a>
         <? else : ?>
@@ -22,22 +24,16 @@
     </td>
     <? endif ?>
     <td>
-        <a href="<?= PluginEngine::getLink($plugin, array(), "view/second/".$version['mkdate']) ?>">
-            <?= date("d.m.Y H:i:s", $version['mkdate']) ?>
-        </a>
         <? if ($version['request_id']) : ?>
-            <? $counter = SormVersion::countBySql("request_id = ?", [$version['request_id']]) ?>
-            <? if ($counter > 1) : ?>
-                <a href="<?= PluginEngine::getLink($plugin, array(), "view/request/".$version['request_id']) ?>"
-                   title="<?= sprintf(_("Alle %s Änderungen derselben Aktion ansehen."), $counter) ?>">
-                    <?= Icon::create("campusnavi", "clickable")->asImg(16, ['class' => "text-bottom"]) ?>
-                </a>
-            <? endif ?>
+        <a href="<?= PluginEngine::getLink($plugin, array(), "view/request/".$version['request_id']) ?>" title="<?= _("Alle Änderungen derselben Aktion anzeigen.") ?>">
         <? endif ?>
-
+            <?= date("d.m.Y H:i:s", $version['mkdate']) ?>
+        <? if ($version['request_id']) : ?>
+        </a>
+        <? endif ?>
     </td>
     <td class="actions">
-        <?= Icon::create($version['delete'] ? "trash" : ($version['create'] ? "star" : "edit"), "inactive")
+        <?= Icon::create($version['delete'] ? "trash" : ($version['create'] ? "star" : "edit"), "info")
                 ->asImg(20, array('class' => "text-bottom", 'title' => $version['delete'] ? _("Objekt wurde gelöscht.") : ($version['create'] ? _("Objekt wurde erzeugt.") : _("Objekt wurde bearbeitet")))) ?>
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog="true">
             <?= Icon::create("info-circle", "clickable")->asImg(20, array('class' => "text-bottom")) ?>
