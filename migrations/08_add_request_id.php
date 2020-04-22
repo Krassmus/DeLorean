@@ -12,8 +12,7 @@ class AddRequestId extends Migration {
 
     public function down()
     {
-        Config::get()->delete("DELOREAN_DISABLED_CLASSES");
-        SimpleORMap::expireTableScheme();
+
     }
 
 }

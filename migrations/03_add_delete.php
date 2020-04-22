@@ -1,18 +1,18 @@
 <?php
 
 class AddDelete extends Migration {
-    
+
     public function up() {
         DBManager::get()->exec("
-            ALTER TABLE `sorm_versions` 
+            ALTER TABLE `sorm_versions`
             ADD `delete` TINYINT DEFAULT '0' AFTER `file_id`
         ");
         DBManager::get()->exec("
-            ALTER TABLE `sorm_versions` 
+            ALTER TABLE `sorm_versions`
             ADD `create` TINYINT DEFAULT '0' AFTER `file_id`
         ");
         DBManager::get()->exec("
-            DELETE FROM `sorm_versions` 
+            DELETE FROM `sorm_versions`
         ");
         Config::get()->create("DELOREAN_DELETE_MEMORY", array(
             'value' => 365,
@@ -27,8 +27,7 @@ class AddDelete extends Migration {
             'filename'    => 'public/plugins_packages/RasmusFuhse/DeLorean/cleanup_delorean.cronjob.php',
             'class'       => 'CleanupDelorean',
             'priority'    => 'normal',
-            'minute'      => '23',
-            'hour'        => '4'
+            'minute'      => '-15'
         );
         $query = "INSERT IGNORE INTO `cronjobs_tasks`
                     (`task_id`, `filename`, `class`, `active`)

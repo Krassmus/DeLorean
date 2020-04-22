@@ -150,7 +150,9 @@ class SormVersion extends SimpleORMap {
     }
 
     public function cbCleanUp() {
-        self::removeDatebaseEntries();
+        if (Config::get()->DELOREAN_CLEANUP_ALWAYS) {
+            self::removeDatebaseEntries();
+        }
     }
 
     public function getFilePath() {
