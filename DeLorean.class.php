@@ -85,6 +85,12 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
                     $version['original_file_path'] = $path;
                 }
             }
+            if (method_exists($sorm, "deloreanGetFilePath")) {
+                $path = $sorm->deloreanGetFilePath();
+                if ($path) {
+                    $version['original_file_path'] = $path;
+                }
+            }
             $version->store();
         }
         return true;
