@@ -69,7 +69,13 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             }
             $version['sorm_class'] = get_class($sorm);
             $version['item_id'] = $sorm->id ?: $sorm->getId();
-            $version['json_data'] = $sorm->toRawArray();
+            if ($action == "create") {
+                $version['json_data'] = [];
+            } else {
+                $class = get_class($sorm);
+                $old_sorm = $class::find($sorm->getId());
+                $version['json_data'] = $old_sorm->toRawArray();
+            }
             $version['request_id'] = $GLOBALS['DELOREAN_UNIQUE_REQUEST_ID'];
             $version['delete'] = 0;
             $version['create'] = 0;
