@@ -64,7 +64,7 @@
                 <img src="<?= PluginEngine::getLink($plugin, array(), "view/file/".$version->getId()) ?>" style="max-width: 100%;">
             <? else : ?>
                 <a href="<?= PluginEngine::getLink($plugin, array(), "view/file/".$version->getId()) ?>">
-                    <?= Assets::img("icons/20/blue/download", array('class' => "text-bottom")) ?>
+                    <?= Icon::create("download", "clickable")->asImg(20, array('class' => "text-bottom")) ?>
                     <?= _("Herunterladen") ?>
                 </a>
             <? endif ?>

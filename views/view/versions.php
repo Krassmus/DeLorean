@@ -42,6 +42,7 @@
                 <th><?= _("Veränderer") ?></th>
                 <? endif ?>
                 <th><?= _("Datum") ?></th>
+                <th><?= _("Speicherplatz") ?></th>
                 <th class="actions">
                     <input type="checkbox" data-proxyfor=":checkbox[name^=v]" aria-label="<?= _("Alle auswählen/abwählen") ?>" title="<?= _("Alle auswählen/abwählen") ?>">
                 </th>

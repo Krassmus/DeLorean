@@ -258,13 +258,15 @@ class ViewController extends PluginController {
 
     protected function initHelpbar()
     {
-        $this->size = Sormversion::getAllocatedSpace();
+        $this->dbsize = Sormversion::getAllocatedDBSpace();
+        $this->filesize = Sormversion::getAllocatedFileSpace();
         $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY mkdate ASC LIMIT 1");
         Helpbar::Get()->addPlainText(
             _("Speicherplatz"),
             sprintf(
-                _("Die gespeicherten Datenbankeinträge plus Dateien nehmen %s GB ein."),
-                round($this->size / (1024 * 1024 * 1024), 2)
+                _("Die gespeicherten Datenbankeinträge plus Dateien nehmen %s GB und die gespeicherten Dateien %s GB ein."),
+                round($this->dbsize / (1024 * 1024 * 1024), 2),
+                round($this->filesize / (1024 * 1024 * 1024), 2)
             )." ".($this->lastversion ? sprintf(_("Und die früheste noch existente Version stammt von %s Uhr."), date("j.n.Y G.i", $this->lastversion['mkdate'])) : "")
         );
     }

@@ -45,7 +45,8 @@ class SormVersion extends SimpleORMap {
         }
     }
 
-    static public function getFileDataPath() {
+    static public function getFileDataPath()
+    {
         $folder = trim(Config::get()->DELOREAN_DATA_PATH) ?: $GLOBALS['STUDIP_BASE_PATH'] . "/data/delorean_files";
         if (!file_exists($folder)) {
             $success = @mkdir($folder);
@@ -59,7 +60,8 @@ class SormVersion extends SimpleORMap {
         return $folder;
     }
 
-    static public function isAllowed($class) {
+    static public function isAllowed($class)
+    {
         if (!is_a($class, "SimpleORMap")) {
             return false;
         }
@@ -73,7 +75,13 @@ class SormVersion extends SimpleORMap {
         return true;
     }
 
-    static public function getAllocatedSpace() {
+    static public function getAllocatedSpace()
+    {
+        return self::getAllocatedDBSpace() + self::getAllocatedFileSpace();
+    }
+
+    static public function getAllocatedDBSpace()
+    {
         $statement = DBManager::get()->prepare("
             SELECT
                 DATA_LENGTH,
@@ -87,6 +95,11 @@ class SormVersion extends SimpleORMap {
         ));
         $data = $statement->fetch(PDO::FETCH_ASSOC);
 
+        return $data['DATA_LENGTH'] + $data['INDEX_LENGTH'];
+    }
+
+    static public function getAllocatedFileSpace()
+    {
         $filesize = 0;
         $folder = self::getFileDataPath();
         if ($folder) {
@@ -97,8 +110,7 @@ class SormVersion extends SimpleORMap {
                 }
             }
         }
-
-        return $data['DATA_LENGTH'] + $data['INDEX_LENGTH'] + $filesize;
+        return $filesize;
     }
 
     protected static function configure($config = array())
@@ -113,7 +125,7 @@ class SormVersion extends SimpleORMap {
 
     function cbSaveFile()
     {
-        if ($this['original_file_path']) {
+        if ($this['original_file_path'] && !$this['create']) {
             $previous = SormVersion::findOneBySQL("item_id = ? ORDER BY item_id DESC", array(
                 $this->json_data['id']
             ));
@@ -124,19 +136,22 @@ class SormVersion extends SimpleORMap {
                     && file_exists($this['original_file_path'])
                     && (md5_file($this['original_file_path']) === md5_file($previous->getFilePath()))
                 ) {
+                //Wenn die Dateien sich nicht unterscheiden, übernimm einfach die alte Datei:
                 $this->content['file_id'] = $previous['file_id'];
             } else {
                 $this->content['file_id'] = md5(uniqid());
                 $filePath = $this->getFilePath();
                 if ($filePath) {
                     @copy($this['original_file_path'], $filePath);
+                    @chmod($filePath,0666);
                 }
             }
         }
         return true;
     }
 
-    public function cbDeleteFile() {
+    public function cbDeleteFile()
+    {
         $filePath = $this->getFilePath();
         if ($this['original_file_path'] && file_exists($filePath)) {
             $another_version = SormVersion::countBySQL("version_id != ? AND file_id = ?", array($this->getId(), $this['file_id']));
@@ -149,13 +164,15 @@ class SormVersion extends SimpleORMap {
         return true;
     }
 
-    public function cbCleanUp() {
+    public function cbCleanUp()
+    {
         if (Config::get()->DELOREAN_CLEANUP_ALWAYS) {
             self::removeDatebaseEntries();
         }
     }
 
-    public function getFilePath() {
+    public function getFilePath()
+    {
         $folder = self::getFileDataPath();
         if (!$folder) {
             return false;
@@ -166,7 +183,8 @@ class SormVersion extends SimpleORMap {
         return self::getFileDataPath()."/".$this['file_id'];
     }
 
-    public function invoke() {
+    public function invoke()
+    {
         if ($this->invokation === null) {
             $class = $this['sorm_class'];
             $id = $this['item_id'];
@@ -182,7 +200,8 @@ class SormVersion extends SimpleORMap {
         return $this->invokation;
     }
 
-    public function undo() {
+    public function undo()
+    {
         if ($this['create']) {
             if ($this->invoke()) {
                 $this->invoke()->delete();
@@ -210,7 +229,8 @@ class SormVersion extends SimpleORMap {
         }
     }
 
-    public function isCurrentObject() {
+    public function isCurrentObject()
+    {
         if (!isset($this['sorm_class']['chdate'])) {
             return false;
         }
@@ -220,13 +240,16 @@ class SormVersion extends SimpleORMap {
             && $new_instance['chdate'] <= $this['sorm_class']['chdate'];
     }
 
-    public function previousVersion() {
+    public function previousVersion()
+    {
         return SormVersion::findOneBySQL("item_id = :item_id AND version_id < :next_version_id ORDER BY version_id DESC", array(
             'item_id' => $this['item_id'],
             'next_version_id' => $this->getId()
         ));
     }
-    public function nextVersion() {
+
+    public function nextVersion()
+    {
         return SormVersion::findOneBySQL("item_id = :item_id AND version_id > :next_version_id ORDER BY version_id ASC", array(
             'item_id' => $this['item_id'],
             'next_version_id' => $this->getId()

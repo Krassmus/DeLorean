@@ -33,6 +33,11 @@
         <? endif ?>
     </td>
     <td class="actions">
+        <? if ($version['file_id'] && file_exists($version->getFilePath())) : ?>
+            <?= round(filesize($version->getFilePath()) / 1024 / 1024, 2) ?> MB
+        <? endif ?>
+    </td>
+    <td class="actions">
         <?= Icon::create($version['delete'] ? "trash" : ($version['create'] ? "star" : "edit"), "info")
                 ->asImg(20, array('class' => "text-bottom", 'title' => $version['delete'] ? _("Objekt wurde gelöscht.") : ($version['create'] ? _("Objekt wurde erzeugt.") : _("Objekt wurde bearbeitet")))) ?>
         <a href="<?= PluginEngine::getLink($plugin, array(), "view/details/".$version->getId()) ?>" data-dialog="true">
