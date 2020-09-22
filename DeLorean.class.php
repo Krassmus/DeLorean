@@ -85,7 +85,8 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             if ($action === "create") {
                 $version['create'] = 1;
             }
-            if (is_a($sorm, "File") && ($sorm['storage'] === "disk")) {
+            if (is_a($sorm, "File")
+                    && (((StudipVersion::olderThan("4.6") && $sorm['storage'] === "disk")) || StudipVersion::newerThan("4.5.99"))) {
                 $path = $sorm->getPath();
                 if ($path) {
                     $version['original_file_path'] = $path;
