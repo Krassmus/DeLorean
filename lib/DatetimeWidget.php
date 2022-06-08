@@ -30,6 +30,7 @@ class DatetimeWidget extends SidebarWidget
         if ($this->layout) {
             $layout = $GLOBALS['template_factory']->open($this->layout);
             $layout->layout_css_classes = $this->layout_css_classes;
+            $layout->additional_attributes = [];
             $template->set_layout($layout);
         }
 
