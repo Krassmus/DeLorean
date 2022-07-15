@@ -251,7 +251,7 @@ class ViewController extends PluginController {
             $constraints[] = "1=1";
         }
         return SormVersion::findBySQL(
-            implode(" AND ", $constraints)." ORDER BY mkdate DESC, version_id DESC LIMIT ".(int) $params['offset'].", ".(int) $params['limit'],
+            implode(" AND ", $constraints)." ORDER BY version_id DESC LIMIT ".(int) $params['offset'].", ".(int) $params['limit'],
             $parameter
         );
     }
@@ -260,7 +260,7 @@ class ViewController extends PluginController {
     {
         $this->dbsize = Sormversion::getAllocatedDBSpace();
         $this->filesize = Sormversion::getAllocatedFileSpace();
-        $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY mkdate ASC LIMIT 1");
+        $this->lastversion = SormVersion::findOneBySQL("1 ORDER BY version_id ASC LIMIT 1");
         Helpbar::Get()->addPlainText(
             _("Speicherplatz"),
             sprintf(

@@ -82,6 +82,12 @@ class SormVersion extends SimpleORMap {
 
     static public function getAllocatedDBSpace()
     {
+        $cache = StudipCacheFactory::getCache();
+        $cache_key = "DeLorean/allocatedDBSpace";
+        $cached_value = $cache->read($cache_key);
+        if ($cached_value) {
+            return $cached_value;
+        }
         $statement = DBManager::get()->prepare("
             SELECT
                 DATA_LENGTH,
@@ -95,11 +101,22 @@ class SormVersion extends SimpleORMap {
         ));
         $data = $statement->fetch(PDO::FETCH_ASSOC);
 
+        $cache->write(
+            $cache_key,
+            $data['DATA_LENGTH'] + $data['INDEX_LENGTH'],
+            15 * 60
+        );
         return $data['DATA_LENGTH'] + $data['INDEX_LENGTH'];
     }
 
     static public function getAllocatedFileSpace()
     {
+        $cache = StudipCacheFactory::getCache();
+        $cache_key = "DeLorean/allocatedFileSpace";
+        $cached_value = $cache->read($cache_key);
+        if ($cached_value) {
+            return $cached_value;
+        }
         $filesize = 0;
         $folder = self::getFileDataPath();
         if ($folder) {
@@ -110,6 +127,7 @@ class SormVersion extends SimpleORMap {
                 }
             }
         }
+        $cache->write($cache_key, $filesize, 15 * 60);
         return $filesize;
     }
 
