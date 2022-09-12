@@ -39,12 +39,27 @@ class ViewController extends PluginController {
             $params['searchfor'] = Request::get("searchfor");
             $this->searchfor = Request::get("searchfor");
         }
+        if (Request::get('type')) {
+            $params['type'] = Request::get("type");
+            $this->type = Request::get("type");
+        }
+        if (Request::option('user_id')) {
+            $params['user_id'] = Request::get("user_id");
+            $this->user_id = Request::get("user_id");
+        }
+        if (Request::option('timestamp')) {
+            $params['since'] = is_numeric(Request::get("timestamp"))
+                ? Request::get("timestamp")
+                : strtotime(Request::get("timestamp"));
+            $this->timestamp = $params['since'];
+        }
         $this->versions = $this->getVersions($params);
         if (count($this->versions) > $this->internal_limit) {
             array_pop($this->versions);
             $this->more = true;
         }
 
+        $this->types = $this->getTypes();
         $this->initHelpbar();
         $this->render_template("view/versions.php", $this->layout);
     }
@@ -102,6 +117,7 @@ class ViewController extends PluginController {
         $this->item_id = $item_id;
         $this->size = Sormversion::getAllocatedSpace();
         $this->initHelpbar();
+        $this->types = $this->getTypes();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -118,59 +134,7 @@ class ViewController extends PluginController {
         $this->request_id = $request_id;
         $this->size = Sormversion::getAllocatedSpace();
         $this->initHelpbar();
-        $this->render_template("view/versions.php", $this->layout);
-    }
-
-    public function second_action($timestamp) {
-        $this->versions = $this->getVersions(array(
-            'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", $this->internal_limit) + 1,
-            'mkdate' => $timestamp
-        ));
-        $this->mkdate = $timestamp;
-        if (count($this->versions) > $this->internal_limit) {
-            array_pop($this->versions);
-            $this->more = true;
-        }
-        $this->caption = _("Gefiltert nach Zeit");
-        $this->initHelpbar();
-        $this->render_template("view/versions.php", $this->layout);
-    }
-
-    public function type_action($class) {
-        $this->versions = $this->getVersions(array(
-            'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", $this->internal_limit) + 1,
-            'type' => $class
-        ));
-        $this->type = $class;
-        if (count($this->versions) > $this->internal_limit) {
-            array_pop($this->versions);
-            $this->more = true;
-        }
-        $this->caption = _("Gefiltert nach Typ");
-        $this->initHelpbar();
-        $this->render_template("view/versions.php", $this->layout);
-    }
-
-    public function by_action($user_id = null) {
-        $user_id || $user_id = Request::option("user_id");
-        if (Request::get("reset-search")) {
-            $this->redirect("view/all");
-            return;
-        }
-        $this->versions = $this->getVersions(array(
-            'offset' => Request::int("offset", 0),
-            'limit' => Request::int("limit", $this->internal_limit) + 1,
-            'user_id' => $user_id
-        ));
-        $this->caption = _("Gefiltert nach Veränderer");
-        $this->user_id = $user_id;
-        if (count($this->versions) > $this->internal_limit) {
-            array_pop($this->versions);
-            $this->more = true;
-        }
-        $this->initHelpbar();
+        $this->types = $this->getTypes();
         $this->render_template("view/versions.php", $this->layout);
     }
 
@@ -234,8 +198,9 @@ class ViewController extends PluginController {
             $parameter['since'] = $params['since'];
         }
         if ($params['searchfor']) {
-            $constraints[] = "(json_data LIKE :searchfor OR sorm_class LIKE :searchfor)";
-            $parameter['searchfor'] = '%'.$params['searchfor'].'%';
+            $constraints[] = "(MATCH (`search_index`) AGAINST (:searchfor IN BOOLEAN MODE) AND `json_data` LIKE :stringsearch)";
+            $parameter['searchfor'] = $params['searchfor'];
+            $parameter['stringsearch'] = "%".$params['searchfor']."%";
         }
         if ($params['type']) {
             $constraints[] = "sorm_class = :sorm_class";
@@ -269,6 +234,23 @@ class ViewController extends PluginController {
                 round($this->filesize / (1024 * 1024 * 1024), 2)
             )." ".($this->lastversion ? sprintf(_("Und die früheste noch existente Version stammt von %s Uhr."), date("j.n.Y G.i", $this->lastversion['mkdate'])) : "")
         );
+    }
+
+    protected function getTypes()
+    {
+        $statement = DBManager::get()->prepare("
+            SELECT `sorm_class`
+            FROM `sorm_versions`
+            GROUP BY `sorm_class`
+            ORDER BY `sorm_class` ASC
+        ");
+        $statement->execute();
+        $types = $statement->fetchAll(PDO::FETCH_COLUMN, 0);
+        $output = ['' => ''];
+        foreach ($types as $type) {
+            $output[$type] = $type;
+        }
+        return $output;
     }
 
 

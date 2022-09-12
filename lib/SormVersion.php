@@ -9,11 +9,11 @@ class SormVersion extends SimpleORMap {
     static public function cleanDBUp()
     {
         $deleting = Config::get()->DELOREAN_DELETE_MEMORY;
-        if ($deleting) {
+        if ($deleting > 0) {
             SormVersion::deleteBySQL("mkdate < UNIX_TIMESTAMP() - ?", array($deleting * 86400));
         }
         $deleting = Config::get()->DELOREAN_MAKE_USERIDS_ANONYMOUS;
-        if ($deleting) {
+        if ($deleting > 0) {
             $statement = DBManager::get()->prepare("
                 UPDATE sorm_versions
                 SET user_id = null
@@ -33,7 +33,7 @@ class SormVersion extends SimpleORMap {
             while ($old_allocated_space - $freeed_space > Config::get()->DELOREAN_MAX_SIZE) {
                 $last = self::findOneBySQL("1 = 1 ORDER BY version_id ASC LIMIT 1");
                 if ($last) {
-                    $freeed_space += strlen($last['json_data']) + 20 + 32 + 128 + 97 + 100 + 100 + 4 + 4 + 11;
+                    $freeed_space += strlen($last['json_data']) + strlen($last['search_index']) + 20 + 32 + 128 + 97 + 100 + 100 + 4 + 4 + 11;
                     if (file_exists($last->getFilePath())) {
                         $freeed_space += filesize($last->getFilePath());
                     }

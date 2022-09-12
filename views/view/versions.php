@@ -12,8 +12,8 @@
     <? if ($searchfor) : ?>
         <input type="hidden" id="searchfor" value="<?= htmlReady($searchfor) ?>">
     <? endif ?>
-    <? if ($mkdate) : ?>
-        <input type="hidden" id="mkdate" value="<?= htmlReady($mkdate) ?>">
+    <? if ($timestamp) : ?>
+        <input type="hidden" id="timestamp" value="<?= htmlReady($timestamp) ?>">
     <? endif ?>
     <? if ($type) : ?>
         <input type="hidden" id="type" value="<?= htmlReady($type) ?>">
@@ -84,11 +84,10 @@
                 data: {
                     'offset': parseInt(jQuery("#offset").val(), 10) + parseInt(jQuery("#limit").val(), 10),
                     'limit': jQuery("#limit").val(),
-                    'since': jQuery("#since").val(),
                     'item_id': jQuery("#item_id").val(),
                     'request_id': jQuery("#request_id").val(),
                     'searchfor': jQuery("#searchfor").val(),
-                    'mkdate': jQuery("#mkdate").val(),
+                    'timestamp': jQuery("#timestamp").val(),
                     'type': jQuery("#type").val(),
                     'user_id': jQuery("#user_id").val()
                 },
@@ -112,11 +111,11 @@
 
 <?
 
-$search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/all"));
+$search = new SearchWidget(PluginEngine::getURL($plugin, $_GET, "view/all"));
 $search->addNeedle(_("ID, Eigenschaft, Zeitstempel"), "searchfor", true);
 Sidebar::Get()->addWidget($search);
 
-$search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/by"));
+$search = new SearchWidget(PluginEngine::getURL($plugin, array(), "view/all"));
 $search->setTitle(_("Personen-Filter"));
 $search->addNeedle(
         _("Person"),
@@ -128,9 +127,12 @@ $search->addNeedle(
 );
 Sidebar::Get()->addWidget($search);
 
+$types_filter = new SelectWidget(_('Typenfilter'), PluginEngine::getURL($plugin, $_GET, "view/all"), 'type');
+$types_filter->setOptions($types);
+Sidebar::Get()->addWidget($types_filter);
 
 $datepicker = new DatetimeWidget(
-    PluginEngine::getURL($plugin, array(), "view/all"),
+    PluginEngine::getURL($plugin, $_GET, "view/all"),
     "timestamp",
     _("ab ...")
 );

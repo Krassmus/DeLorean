@@ -5,18 +5,23 @@
            title="ID: <?= htmlReady($version['item_id']) ?>"></a>
     </td>
     <td>
-        <a href="<?= PluginEngine::getLink($plugin, array(), "view/type/".$version['sorm_class']) ?>">
+        <a href="<?= PluginEngine::getLink($plugin, array('type' => $version['sorm_class']), "view/all") ?>">
             <?= htmlReady($version['sorm_class']) ?>
         </a>
     </td>
     <? if (!Config::get()->DELOREAN_ANONYMOUS_USERS) : ?>
     <td>
-        <? if ($version['user_id']) : ?>
+        <? if ($version['user_id'] && ($version['user_id'] !== 'cli')) : ?>
             <a href="<?= URLHelper::getLink( "dispatch.php/profile", ['username' => get_username($version['user_id'])]) ?>">
                 <?= Avatar::getAvatar($version['user_id'])->getImageTag(Avatar::SMALL) ?>
             </a>
-            <a href="<?= PluginEngine::getLink($plugin, array(), "view/by/".$version['user_id']) ?>">
+            <a href="<?= PluginEngine::getLink($plugin, array('user_id' => $version['user_id']), "view/all") ?>">
                 <?= htmlReady(get_fullname($version['user_id'])) ?>
+            </a>
+        <? elseif ($version['user_id'] && ($version['user_id'] === 'cli')) : ?>
+            <?= Icon::create($plugin->getPluginURL().'/assets/terminal.svg', Icon::ROLE_INFO)->asImg(25, ['class' => 'avatar-small']) ?>
+            <a href="<?= PluginEngine::getLink($plugin, array('user_id' => $version['user_id']), "view/all") ?>">
+                <?= htmlReady(_('Cronjob / CLI')) ?>
             </a>
         <? else : ?>
             <?= _("unbekannt") ?>
