@@ -10,19 +10,24 @@ class SormVersion extends SimpleORMap {
     {
         $deleting = Config::get()->DELOREAN_DELETE_MEMORY;
         if ($deleting > 0) {
-            SormVersion::deleteBySQL("mkdate < UNIX_TIMESTAMP() - ?", array($deleting * 86400));
+            $limit = 1000; //delete in chunks so that we don't need too much memory
+            do {
+                $deleted = SormVersion::deleteBySQL("mkdate < UNIX_TIMESTAMP() - ? LIMIT " . $limit, array($deleting * 86400));
+            } while ($deleted == $limit);
         }
-        $deleting = Config::get()->DELOREAN_MAKE_USERIDS_ANONYMOUS;
-        if ($deleting > 0) {
+        $anonymizing = Config::get()->DELOREAN_MAKE_USERIDS_ANONYMOUS;
+        if ($anonymizing > 0) {
             $statement = DBManager::get()->prepare("
                 UPDATE sorm_versions
                 SET user_id = null
                 WHERE user_id IS NOT NULL
                     AND mkdate < UNIX_TIMESTAMP() - ?
             ");
-            $statement->execute(array($deleting));
+            $statement->execute(array($anonymizing));
         }
         self::removeDatebaseEntries();
+        $cache_key = "DeLorean/allocatedDBSpace";
+        StudipCacheFactory::getCache()->expire($cache_key);
     }
 
     protected static function removeDatebaseEntries()
@@ -120,10 +125,12 @@ class SormVersion extends SimpleORMap {
         $filesize = 0;
         $folder = self::getFileDataPath();
         if ($folder) {
-            $files = array_diff(scandir($folder), array('.', '..'));
-            foreach ($files as $file) {
-                if (file_exists($folder . "/" . $file)) {
-                    $filesize += filesize($folder . "/" . $file);
+            $handle = opendir($folder);
+            while (false !== ($file = readdir($handle))) {
+                if (!in_array($file, ['.','..'])) {
+                    if (file_exists($folder . "/" . $file)) {
+                        $filesize += filesize($folder . "/" . $file);
+                    }
                 }
             }
         }

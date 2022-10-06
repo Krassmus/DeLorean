@@ -36,7 +36,7 @@ class CleanupDelorean extends CronJob
     public function execute($last_result, $parameters = array())
     {
         $filespace = SormVersion::getAllocatedFileSpace();
-        $dbspace = SormVersion::getAllocatedFileSpace();
+        $dbspace = SormVersion::getAllocatedDBSpace();
         SormVersion::cleanDBUp();
         echo "Vorher: ".$this->getSizeName($dbspace) . " Datenbank und " . $this->getSizeName($filespace). " Dateien.\n";
         echo "Nachher: ".$this->getSizeName(SormVersion::getAllocatedFileSpace()) . " Datenbank und " . $this->getSizeName(SormVersion::getAllocatedFileSpace()). " Dateien.\n";
