@@ -14,7 +14,8 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             $navigation = new Navigation(_("DeLorean-Wiederherstellungsmaschine"), PluginEngine::getURL($this, array(), "view/all"));
             Navigation::addItem("/admin/config/delorean", $navigation);
         }
-        if (Context::get()->id
+        if (Context::get()
+                && Context::get()->id
                 && $GLOBALS['perm']->have_studip_perm(Config::get()->DELOREAN_RECOVERY_PERM, Context::get()->id)
                 && Navigation::hasItem("/course/files")
                 && (stripos($_SERVER['REQUEST_URI'], "dispatch.php/course/files") !== false)) {
@@ -49,6 +50,7 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
     }
 
     public function versioning($event, $sorm) {
+        $action = null;
         if (substr($event, -10) === "WillDelete") {
             $action = "delete";
         }
