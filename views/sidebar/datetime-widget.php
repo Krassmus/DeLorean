@@ -1,4 +1,4 @@
-<? if ($reset_search): ?>
+<? if (!empty($reset_search)) : ?>
     <div style="text-align: right;">
         <?= $reset_search ?>
     </div>
@@ -9,9 +9,9 @@
     </label>
     <input type="text" id="needle-<?= $hash ?>"
            name="<?= htmlReady($name) ?>"
-           value="<?= htmlReady($value) ?>"
-           <?= $value ? "onChange=\"if (!this.value) { jQuery(this).closest('form').submit(); }\"" : "" ?>
-        <? if ($placeholder) printf('placeholder="%s"', htmlReady($label)); ?>>
+           value="<?= htmlReady($value ?? "") ?>"
+           <?= !empty($value) ? "onChange=\"if (!this.value) { jQuery(this).closest('form').submit(); }\"" : "" ?>
+        <? if (!empty($label)) printf('placeholder="%s"', htmlReady($label)); ?>>
 
     <?= \Studip\Button::create(_("Datum oder früher anzeigen")) ?>
 

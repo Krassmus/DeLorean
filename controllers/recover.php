@@ -105,29 +105,109 @@ class RecoverController extends PluginController {
         throw new Exception("No file.");
     }
 
-    protected function filefolder_undo($version)
+    public function messages_action()
+    {
+        PageLayout::setTitle(_('Nachrichten wiederherstellen'));
+        Navigation::activateItem('/messaging');
+        $deleted_message_user = MessageUser::findBySQL("`deleted` = 1 AND `user_id` = ?", [User::findCurrent()->id]);
+        $this->deleted_items = SormVersion::findBySQL("`sorm_class` = 'MessageUser' AND `delete` = '1' AND `search_index` LIKE ? AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)", ['%'.User::findCurrent()->id.'%']);
+        $this->deleted_items = array_merge($this->deleted_items, $deleted_message_user);
+        usort($this->deleted_items, function ($a, $b) {
+            $a_timestamp = is_a($a, SormVersion::class) ? $a->json_data['mkdate'] : $a->mkdate;
+            $b_timestamp = is_a($b, SormVersion::class) ? $b->json_data['mkdate'] : $b->mkdate;
+            return $a_timestamp <= $b_timestamp;
+        });
+    }
+
+    public function revive_messages_action() {
+        if (!Request::isPost()) {
+            throw new MethodNotAllowedException();
+        }
+        $message_ids = Request::getArray('m');
+
+        $box = "inbox";
+
+        foreach ($message_ids as $message_id) {
+            $message_user = MessageUser::findOneBySQL("`user_id` = :user_id AND `message_id` = :message_id", [
+                'user_id' => User::findCurrent()->id,
+                'message_id' => $message_id
+            ]);
+            if ($message_user) {
+                if ($message_user['snd_rec'] == 'snd') {
+                    $box = "outbox";
+                }
+                $message_user->deleted = 0;
+                $message_user->store();
+            } else {
+                $deleted_messages = SormVersion::findBySQL("`sorm_class` = 'Message' AND `delete` = '1' AND `item_id` = :message_id AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)", [
+                    'message_id' => $message_id
+                ]);
+                foreach ($deleted_messages as $deleted_message) {
+                    $deleted_message->undo();
+                }
+                echo $message_id." ";
+
+
+                $deleted_message_users = SormVersion::findBySQL("`sorm_class` = 'MessageUser' AND `delete` = '1' AND `search_index` LIKE :message_id AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)", [
+                    'message_id' => '%'.$message_id.'%'
+                ]);
+                foreach ($deleted_message_users as $deleted_message_user) {
+                    $deleted_message_user->undo();
+                }
+
+                //possible folder with attachments:
+                $message_users = MessageUser::findBySQL("`message_id` = :message_id", [
+                    'message_id' => $message_id
+                ]);
+                foreach ($message_users as $message_user) {
+                    if ($message_user['user_id'] === User::findCurrent()->id) {
+                        $message_user->deleted = 0;
+                    }
+                    $message_user->store();
+                }
+                foreach ($message_users as $message_user) {
+                    if ($message_user['user_id'] !== User::findCurrent()->id) {
+                        $message_user->deleted = 1;
+                    }
+                    $message_user->store();
+                }
+                $deleted_folders = SormVersion::findBySQL("`sorm_class` = 'Folder' AND `delete` = '1' AND `search_index` LIKE :message_id AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)", [
+                    'message_id' => '%'.$message_id.'%'
+                ]);
+                foreach ($deleted_folders as $deleted_folder) {
+                    if ($deleted_folder->json_data['range_type'] === 'message') {
+                        $this->filefolder_undo($deleted_folder, true);
+                    }
+                }
+            }
+        }
+
+        $this->redirect(URLHelper::getURL($box === 'inbox' ? 'dispatch.php/messages/overview' : 'dispatch.php/messages/sent'));
+    }
+
+    protected function filefolder_undo($version, $force = false)
     {
         //check if allowed
         if ($version['sorm_class'] === "Folder") {
-            if (!$GLOBALS['perm']->have_studip_perm(Config::get()->DELOREAN_RECOVERY_PERM, $version['json_data']['range_id'])) {
+            if (!$GLOBALS['perm']->have_studip_perm(Config::get()->DELOREAN_RECOVERY_PERM, $version['json_data']['range_id']) && !$force) {
                 return;
             }
             $version->undo();
             $folder_versions = SormVersion::findBySQL("sorm_class = 'Folder' AND json_data LIKE ?  AND `delete` = '1'  AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1) ", array("%".$version['item_id']."%"));
             foreach ($folder_versions as $fv) {
                 if ($fv['json_data']['parent_id'] === $version['item_id']) {
-                    $this->filefolder_undo($fv);
+                    $this->filefolder_undo($fv, $force);
                 }
             }
             $file_versions = SormVersion::findBySQL("sorm_class = 'FileRef' AND json_data LIKE ?  AND `delete` = '1'  AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1) ", array("%".$version['item_id']."%"));
             foreach ($file_versions as $fv) {
                 if ($fv['json_data']['folder_id'] === $version['item_id']) {
-                    $this->filefolder_undo($fv);
+                    $this->filefolder_undo($fv, $force);
                 }
             }
         } else {
             $parentFolder = Folder::find($version['json_data']['folder_id']);
-            if (!$parentFolder || !$GLOBALS['perm']->have_studip_perm(Config::get()->DELOREAN_RECOVERY_PERM, $parentFolder['range_id'])) {
+            if (!$parentFolder || (!$GLOBALS['perm']->have_studip_perm(Config::get()->DELOREAN_RECOVERY_PERM, $parentFolder['range_id'])) && !$force) {
                 return;
             }
             //FileRef

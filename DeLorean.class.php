@@ -3,7 +3,7 @@
 require_once __DIR__."/lib/SormVersion.php";
 require_once __DIR__."/lib/DatetimeWidget.php";
 
-class DeLorean extends StudIPPlugin implements SystemPlugin {
+class DeLorean extends StudIPPlugin implements SystemPlugin, \JsonApi\Contracts\JsonApiPlugin {
 
     public function __construct()
     {
@@ -20,6 +20,11 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
                 && Navigation::hasItem("/course/files")
                 && (stripos($_SERVER['REQUEST_URI'], "dispatch.php/course/files") !== false)) {
             NotificationCenter::addObserver($this, "addToFilesSidebar", "SidebarWillRender");
+        }
+
+        if (Navigation::hasItem("/messaging")
+            && ((stripos($_SERVER['REQUEST_URI'], "dispatch.php/messages/overview") !== false) || (stripos($_SERVER['REQUEST_URI'], "dispatch.php/messages/sent") !== false))) {
+            NotificationCenter::addObserver($this, "addToMessagesSidebar", "SidebarWillRender");
         }
 
     }
@@ -44,6 +49,20 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             $actions->addLink(
                 _("Objekte wiederherstellen"),
                 PluginEngine::getURL($this, array(), "recover/overview"),
+                Icon::create("archive2", "clickable")
+            );
+        }
+    }
+
+    public function addToMessagesSidebar()
+    {
+        $deleted_message_user = MessageUser::countBySQL("`deleted` = 1 AND `user_id` = ?", [User::findCurrent()->id]);
+        $versions = SormVersion::countBySQL("`sorm_class` = 'MessageUser' AND `delete` = '1' AND `search_index` LIKE ? AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)", ['%'.User::findCurrent()->id.'%']);
+        if ($versions + $deleted_message_user > 0) {
+            $actions = Sidebar::Get()->getWidget("actions");
+            $actions->addLink(
+                _("Objekte wiederherstellen"),
+                PluginEngine::getURL($this, array(), "recover/messages"),
                 Icon::create("archive2", "clickable")
             );
         }
@@ -109,6 +128,18 @@ class DeLorean extends StudIPPlugin implements SystemPlugin {
             $version->store();
         }
         return true;
+    }
+
+    public function registerAuthenticatedRoutes(\Slim\Routing\RouteCollectorProxy $group) {
+
+    }
+
+    public function registerUnauthenticatedRoutes(\Slim\Routing\RouteCollectorProxy $group) {
+
+    }
+
+    public function registerSchemas(): array {
+        return [];
     }
 
     public function stringToColorCode($str) {

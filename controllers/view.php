@@ -181,32 +181,32 @@ class ViewController extends PluginController {
             $params['limit'] = $this->internal_limit;
         }
 
-        if ($params['item_id']) {
+        if (isset($params['item_id'])) {
             $constraints[] = "item_id = :item_id";
             $parameter['item_id'] = $params['item_id'];
         }
-        if ($params['request_id']) {
+        if (isset($params['request_id'])) {
             $constraints[] = "request_id = :request_id";
             $parameter['request_id'] = $params['request_id'];
         }
-        if ($params['mkdate']) {
+        if (isset($params['mkdate'])) {
             $constraints[] = "mkdate = :mkdate";
             $parameter['mkdate'] = $params['mkdate'];
         }
-        if ($params['since']) {
+        if (isset($params['since'])) {
             $constraints[] = "mkdate <= :since";
             $parameter['since'] = $params['since'];
         }
-        if ($params['searchfor']) {
+        if (isset($params['searchfor'])) {
             $constraints[] = "(MATCH (`search_index`) AGAINST (:searchfor IN BOOLEAN MODE) AND `json_data` LIKE :stringsearch)";
             $parameter['searchfor'] = $params['searchfor'];
             $parameter['stringsearch'] = "%".$params['searchfor']."%";
         }
-        if ($params['type']) {
+        if (isset($params['type'])) {
             $constraints[] = "sorm_class = :sorm_class";
             $parameter['sorm_class'] = $params['type'];
         }
-        if ($params['user_id']) {
+        if (isset($params['user_id'])) {
             $constraints[] = "user_id = :user_id";
             $parameter['user_id'] = $params['user_id'];
         }

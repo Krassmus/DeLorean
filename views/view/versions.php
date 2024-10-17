@@ -3,22 +3,22 @@
     <input type="hidden" id="offset" value="<?= Request::int("offset", 0) ?>">
     <input type="hidden" id="limit" value="<?= $internal_limit ?>">
     <input type="hidden" id="since" value="<?= time() ?>">
-    <? if ($item_id) : ?>
+    <? if (!empty($item_id)) : ?>
         <input type="hidden" id="item_id" value="<?= htmlReady($item_id) ?>">
     <? endif ?>
-    <? if ($request_id) : ?>
+    <? if (!empty($request_id)) : ?>
         <input type="hidden" id="request_id" value="<?= htmlReady($request_id) ?>">
     <? endif ?>
-    <? if ($searchfor) : ?>
+    <? if (!empty($searchfor)) : ?>
         <input type="hidden" id="searchfor" value="<?= htmlReady($searchfor) ?>">
     <? endif ?>
-    <? if ($timestamp) : ?>
+    <? if (!empty($timestamp)) : ?>
         <input type="hidden" id="timestamp" value="<?= htmlReady($timestamp) ?>">
     <? endif ?>
-    <? if ($type) : ?>
+    <? if (!empty($type)) : ?>
         <input type="hidden" id="type" value="<?= htmlReady($type) ?>">
     <? endif ?>
-    <? if ($user_id) : ?>
+    <? if (!empty($user_id)) : ?>
         <input type="hidden" id="user_id" value="<?= htmlReady($user_id) ?>">
     <? endif ?>
 
@@ -29,7 +29,7 @@
     <div style="clear: both;"></div>
 
     <table class="default" id="sormversions">
-        <? if ($caption) : ?>
+        <? if (!empty($caption)) : ?>
         <caption>
             <?= htmlReady($caption) ?>
         </caption>
@@ -60,7 +60,7 @@
             <? endif ?>
         </tbody>
         <tfoot>
-        <? if ($more) : ?>
+        <? if (!empty($more)) : ?>
             <tr class="more">
                 <td colspan="6" style="text-align: center">
                     <?= Assets::img("ajax-indicator-black.svg") ?>
@@ -123,7 +123,7 @@ $search->addNeedle(
         true,
         new StandardSearch("user_id"),
         "function () { jQuery('input[name=user_id]').closest('form').submit(); }",
-        $user_id
+        isset($user_id) ? $user_id : null
 );
 Sidebar::Get()->addWidget($search);
 

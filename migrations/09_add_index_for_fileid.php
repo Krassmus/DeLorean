@@ -3,10 +3,12 @@
 class AddIndexForFileid extends Migration {
 
     public function up() {
-        DBManager::get()->exec("
-            ALTER TABLE sorm_versions
-            ADD INDEX `file_id` (`file_id`)
-        ");
+        try {
+            DBManager::get()->exec("
+                ALTER TABLE sorm_versions
+                ADD INDEX `file_id` (`file_id`)
+            ");
+        } catch (Exception $e) {}
         SimpleORMap::expireTableScheme();
     }
 

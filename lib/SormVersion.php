@@ -246,6 +246,10 @@ class SormVersion extends SimpleORMap {
             }
             $current->setData($this['json_data']->getArrayCopy());
 
+            if ($this['sorm_class'] === 'MessageUser') {
+                $current->deleted = 0;
+            }
+
             $success = $current->store();
             if ($success && $this['original_file_path']) {
                 @copy($this->getFilePath(), $this['original_file_path']);
