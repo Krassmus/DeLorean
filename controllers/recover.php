@@ -108,7 +108,7 @@ class RecoverController extends PluginController {
     public function messages_action()
     {
         PageLayout::setTitle(_('Nachrichten wiederherstellen'));
-        Navigation::activateItem('/messaging');
+        Navigation::activateItem("/messaging/messages/recover");
         $deleted_message_user = MessageUser::findBySQL("`deleted` = 1 AND `user_id` = ?", [User::findCurrent()->id]);
         $this->deleted_items = SormVersion::findBySQL("`sorm_class` = 'MessageUser' AND `delete` = '1' AND `search_index` LIKE ? AND version_id = (SELECT version_id FROM sorm_versions AS s2 WHERE s2.item_id = sorm_versions.item_id AND s2.sorm_class = sorm_versions.sorm_class ORDER BY version_id DESC LIMIT 1)", ['%'.User::findCurrent()->id.'%']);
         $this->deleted_items = array_merge($this->deleted_items, $deleted_message_user);

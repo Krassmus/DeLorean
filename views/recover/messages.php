@@ -70,10 +70,23 @@
                 </tr>
             <? endif ?>
             <? endforeach ?>
+            <? if (count($deleted_items) === 0) : ?>
+            <tr>
+                <td colspan="5"><?= _('Sie haben keine gelöschten Nachrichten, die wiederhergestellt werden können.') ?></td>
+            </tr>
+            <? endif ?>
         </tbody>
     </table>
 
-    <div>
-        <?= \Studip\Button::create(_('Ausgewählte wiederherstellen')) ?>
-    </div>
+
 </form>
+
+<?
+$action = new ActionsWidget();
+$action->addLink(
+    _('Ausgewählte wiederherstellen'),
+    '#',
+    Icon::create('brainstorm'),
+    ['onclick' => "$('#revive_messages').submit(); return false;"]
+);
+Sidebar::Get()->addWidget($action);
